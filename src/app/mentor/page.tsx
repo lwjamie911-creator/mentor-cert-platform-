@@ -1,0 +1,222 @@
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { MentorSelfCheckPanel } from './self-check-panel'
+import { MentorNewbieList } from './newbie-list'
+import Link from 'next/link'
+import dayjs from 'dayjs'
+
+export default async function MentorPage() {
+  const session = await getServerSession(authOptions)!
+
+  const [selfCheck, mentorCert, pairs] = await Promise.all([
+    prisma.mentorSelfCheck.findUnique({ where: { userId: session!.user.id } }),
+    prisma.mentorCertificate.findUnique({ where: { userId: session!.user.id } }),
+    prisma.mentorNewbiePair.findMany({
+      where: { mentorId: session!.user.id },
+      include: {
+        newbie: {
+          select: {
+            id: true, name: true, email: true,
+            newbieChecklist: true,
+            newbieExam: true,
+            newbieBadge: true,
+          },
+        },
+      },
+    }),
+  ])
+
+  const selfCheckDone = selfCheck?.check1 && selfCheck?.check2 && selfCheck?.check3
+  const newbiesDone = pairs.filter(p => p.newbie.newbieBadge && p.newbie.newbieExam?.passed)
+  const pendingConfirmCount = pairs.reduce((acc, p) => {
+    const cl = p.newbie.newbieChecklist
+    if (!cl) return acc
+    return acc + (['A', 'B', 'C'] as const).filter(k => cl[`check${k}_self`] && !cl[`check${k}_mentor`]).length
+  }, 0)
+
+  // 进度计算：3步，每步1分
+  const progress = [selfCheckDone, !!mentorCert, pairs.length > 0].filter(Boolean).length
+
+  return (
+    <div className="space-y-5">
+
+      {/* Hero 区 */}
+      <div className="rounded-2xl p-6 text-white relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #fb923c 100%)' }}>
+        <div className="absolute top-[-30px] right-[-30px] w-40 h-40 rounded-full bg-white/10" />
+        <div className="absolute bottom-[-20px] right-[60px] w-24 h-24 rounded-full bg-white/10" />
+        <div className="relative z-10">
+          <p className="text-amber-100 text-xs mb-1">导师专区</p>
+          <h1 className="text-2xl font-bold mb-3">你好，{session!.user.name} 🎓</h1>
+          {/* 进度条 */}
+          <div className="flex items-center gap-2 mb-1">
+            <div className="flex-1 h-2 bg-white/30 rounded-full overflow-hidden">
+              <div className="h-full bg-white rounded-full transition-all duration-700"
+                style={{ width: `${(progress / 3) * 100}%` }} />
+            </div>
+            <span className="text-white/80 text-xs font-mono">{progress}/3</span>
+          </div>
+          <p className="text-amber-100 text-xs">
+            {progress === 0 && '从导师资质自检开始你的认证之旅'}
+            {progress === 1 && '自检完成！接下来参加知识测试'}
+            {progress === 2 && '认证完成！开始管理你的新人吧'}
+            {progress === 3 && '全部完成，你是一位认证导师 ✨'}
+          </p>
+        </div>
+      </div>
+
+      {/* 新人完成提醒 */}
+      {newbiesDone.length > 0 && (
+        <div className="rounded-xl border border-green-200 bg-green-50 px-5 py-4 flex items-start gap-3">
+          <span className="text-xl mt-0.5">🎉</span>
+          <div>
+            <p className="font-semibold text-green-800 text-sm">
+              {newbiesDone.length} 位新人已完成全部考核！
+            </p>
+            <p className="text-green-600 text-xs mt-0.5">
+              {newbiesDone.map(p => p.newbie.name).join('、')} 已达标，快去看看吧
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 步骤一：自检 */}
+      <StepCard
+        step={1}
+        title="导师资质自检"
+        done={!!selfCheckDone}
+        locked={false}
+        accentColor="amber"
+      >
+        <MentorSelfCheckPanel
+          userId={session!.user.id}
+          initialCheck={selfCheck
+            ? { check1: selfCheck.check1, check2: selfCheck.check2, check3: selfCheck.check3 }
+            : null}
+        />
+      </StepCard>
+
+      {/* 步骤二：知识测试 */}
+      <StepCard
+        step={2}
+        title="导师知识测试"
+        done={!!mentorCert}
+        locked={!selfCheckDone}
+        lockedHint="请先完成资质自检"
+        accentColor="amber"
+      >
+        {mentorCert ? (
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1">
+              <p className="text-sm text-gray-500 mb-1">考试得分</p>
+              <p className="text-3xl font-bold text-amber-600">{mentorCert.score} <span className="text-base font-normal text-gray-400">分</span></p>
+              <p className="text-xs text-gray-400 mt-1">证书有效期至 {dayjs(mentorCert.expiresAt).format('YYYY年MM月DD日')}</p>
+            </div>
+            <Link href="/mentor/certificate"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-amber-700 border-2 border-amber-300 hover:bg-amber-50 transition-colors"
+            >
+              🏆 查看认证证书
+            </Link>
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1">
+              <p className="text-sm text-gray-500">从题库随机抽取 5 道题</p>
+              <p className="text-xs text-gray-400 mt-0.5">60 分及以上视为通过，可立即颁发证书</p>
+            </div>
+            <Link href="/mentor/exam"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+              style={{ background: 'linear-gradient(90deg, #f59e0b, #fb923c)' }}
+            >
+              开始测试 →
+            </Link>
+          </div>
+        )}
+      </StepCard>
+
+      {/* 步骤三：我的新人 */}
+      <StepCard
+        step={3}
+        title="我的新人"
+        done={false}
+        locked={!mentorCert}
+        lockedHint="请先完成认证测试"
+        accentColor="blue"
+        badge={pendingConfirmCount > 0 ? `${pendingConfirmCount} 项待确认` : undefined}
+      >
+        <MentorNewbieList
+          mentorId={session!.user.id}
+          pairs={pairs.map(p => ({
+            id: p.id,
+            newbieId: p.newbie.id,
+            newbieName: p.newbie.name,
+            newbieEmail: p.newbie.email,
+            checklist: p.newbie.newbieChecklist,
+            exam: p.newbie.newbieExam,
+            badge: p.newbie.newbieBadge,
+          }))}
+        />
+      </StepCard>
+
+    </div>
+  )
+}
+
+function StepCard({
+  step, title, done, locked, lockedHint, accentColor, badge, children,
+}: {
+  step: number
+  title: string
+  done: boolean
+  locked: boolean
+  lockedHint?: string
+  accentColor: 'amber' | 'blue'
+  badge?: string
+  children: React.ReactNode
+}) {
+  const colors = {
+    amber: {
+      ring: 'ring-amber-200',
+      dot: done ? 'bg-green-500' : 'bg-amber-400',
+      dotLocked: 'bg-gray-200',
+      num: done ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700',
+    },
+    blue: {
+      ring: 'ring-blue-200',
+      dot: done ? 'bg-green-500' : 'bg-blue-400',
+      dotLocked: 'bg-gray-200',
+      num: done ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700',
+    },
+  }
+  const c = colors[accentColor]
+
+  return (
+    <section className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden
+      ${locked ? 'border-gray-100' : `border-gray-200 ring-1 ${c.ring}`}
+      ${locked ? 'opacity-50 pointer-events-none' : ''}
+    `}>
+      {/* 卡片顶栏 */}
+      <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-50">
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0
+          ${locked ? 'bg-gray-100 text-gray-400' : c.num}`}>
+          {done ? '✓' : step}
+        </span>
+        <h2 className="font-semibold text-gray-900 flex-1">{title}</h2>
+        {done && (
+          <span className="text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full font-medium">已完成</span>
+        )}
+        {locked && lockedHint && (
+          <span className="text-xs text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full">{lockedHint}</span>
+        )}
+        {badge && (
+          <span className="text-xs text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full font-medium animate-pulse">
+            {badge}
+          </span>
+        )}
+      </div>
+      {/* 内容区 */}
+      {!locked && <div className="px-6 py-5">{children}</div>}
+    </section>
+  )
+}

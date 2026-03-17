@@ -1,0 +1,271 @@
+// 数据库配置：使用 SQLite（一个文件，无需安装数据库服务器）
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ─────────────────────────────────────────────
+// 用户
+// ─────────────────────────────────────────────
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+  role          String    @default("learner")   // learner | admin
+  status        String    @default("pending")   // pending | active | disabled
+  department    String?
+  createdAt     DateTime  @default(now())
+  lastLoginAt   DateTime?
+
+  enrollments   Enrollment[]
+  examAttempts  ExamAttempt[]
+  certificates  Certificate[]
+
+  // 新人专区
+  newbieChecklist   NewbieChecklist?
+  newbieExam        NewbieExam?
+  mentorPairAs      MentorNewbiePair[]  @relation("MentorPairs")
+  newbiePairAs      MentorNewbiePair?   @relation("NewbiePairs")
+
+  // 导师专区
+  mentorSelfCheck   MentorSelfCheck?
+  mentorCertificate MentorCertificate?
+  newbieBadge       NewbieBadge?
+}
+
+// ─────────────────────────────────────────────
+// 课程
+// ─────────────────────────────────────────────
+model Course {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  deadlineDays  Int       @default(30)          // 报名后多少天内完成
+  orderIndex    Int       @default(0)
+  isPublished   Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+
+  chapters      Chapter[]
+  enrollments   Enrollment[]
+  certificates  Certificate[]
+}
+
+// ─────────────────────────────────────────────
+// 章节
+// ─────────────────────────────────────────────
+model Chapter {
+  id              String    @id @default(cuid())
+  courseId        String
+  title           String
+  description     String?
+  contentType     String    // text | pdf | external_link
+  contentText     String?   // markdown 文本内容
+  contentUrl      String?   // PDF 文件路径 或 外链 URL
+  minReadSeconds  Int       @default(0)    // 外链/PDF 最少停留秒数
+  orderIndex      Int       @default(0)
+  isRequired      Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+
+  course          Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions       Question[]
+  progress        Progress[]
+}
+
+// ─────────────────────────────────────────────
+// 题目
+// ─────────────────────────────────────────────
+model Question {
+  id          String    @id @default(cuid())
+  chapterId   String?                         // 关联章节（章节测验）
+  courseId    String?                         // 关联课程（期末考试）
+  type        String                          // single | multiple | truefalse
+  content     String
+  options     String                          // JSON: ["选项A","选项B",...]
+  answer      String                          // JSON: ["A"] 或 ["A","B"]
+  explanation String?                         // 解析
+  difficulty  Int       @default(1)           // 1-3
+  createdAt   DateTime  @default(now())
+
+  chapter     Chapter?  @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+}
+
+// ─────────────────────────────────────────────
+// 学习进度（每个用户每个章节）
+// ─────────────────────────────────────────────
+model Progress {
+  id              String    @id @default(cuid())
+  userId          String
+  chapterId       String
+  status          String    @default("not_started")  // not_started | in_progress | completed
+  timeSpentSeconds Int      @default(0)
+  startedAt       DateTime?
+  completedAt     DateTime?
+
+  chapter         Chapter   @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chapterId])
+}
+
+// ─────────────────────────────────────────────
+// 报名（用户 ↔ 课程，记录截止日期）
+// ─────────────────────────────────────────────
+model Enrollment {
+  id          String    @id @default(cuid())
+  userId      String
+  courseId    String
+  deadline    DateTime
+  status      String    @default("in_progress")  // in_progress | completed | expired
+  enrolledAt  DateTime  @default(now())
+  completedAt DateTime?
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+// ─────────────────────────────────────────────
+// 考试记录
+// ─────────────────────────────────────────────
+model ExamAttempt {
+  id            String    @id @default(cuid())
+  userId        String
+  chapterId     String?
+  courseId      String?
+  examType      String    // chapter | final
+  score         Int?
+  totalQuestions Int      @default(0)
+  correctCount  Int       @default(0)
+  passThreshold Int       @default(60)
+  passed        Boolean   @default(false)
+  answers       String?   // JSON: { questionId: selectedAnswer }
+  startedAt     DateTime  @default(now())
+  submittedAt   DateTime?
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// 资格证书（导师认证课程）
+// ─────────────────────────────────────────────
+model Certificate {
+  id            String    @id @default(cuid())
+  userId        String
+  courseId      String
+  certificateNo String    @unique
+  issuedAt      DateTime  @default(now())
+  expiresAt     DateTime
+  pdfPath       String?
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course        Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+// ─────────────────────────────────────────────
+// 导师-新人配对
+// ─────────────────────────────────────────────
+model MentorNewbiePair {
+  id        String   @id @default(cuid())
+  mentorId  String
+  newbieId  String   @unique
+  createdAt DateTime @default(now())
+
+  mentor    User     @relation("MentorPairs", fields: [mentorId], references: [id], onDelete: Cascade)
+  newbie    User     @relation("NewbiePairs", fields: [newbieId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// 导师自检（1/2/3 三项）
+// ─────────────────────────────────────────────
+model MentorSelfCheck {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  check1      Boolean   @default(false)
+  check2      Boolean   @default(false)
+  check3      Boolean   @default(false)
+  allDoneAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// 导师认证证书（独立于课程证书）
+// ─────────────────────────────────────────────
+model MentorCertificate {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  certificateNo String   @unique
+  score         Int
+  issuedAt      DateTime @default(now())
+  expiresAt     DateTime
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// 新人 ABC 成长指标
+// ─────────────────────────────────────────────
+model NewbieChecklist {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  mentorWxId       String
+
+  checkA_self      Boolean   @default(false)
+  checkA_selfAt    DateTime?
+  checkA_mentor    Boolean   @default(false)
+  checkA_mentorAt  DateTime?
+
+  checkB_self      Boolean   @default(false)
+  checkB_selfAt    DateTime?
+  checkB_mentor    Boolean   @default(false)
+  checkB_mentorAt  DateTime?
+
+  checkC_self      Boolean   @default(false)
+  checkC_selfAt    DateTime?
+  checkC_mentor    Boolean   @default(false)
+  checkC_mentorAt  DateTime?
+
+  allDoneAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// 新人知识测试
+// ─────────────────────────────────────────────
+model NewbieExam {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  score            Int       @default(0)
+  totalQuestions   Int       @default(0)
+  correctCount     Int       @default(0)
+  passed           Boolean   @default(false)
+  answers          String?
+  subjectiveAnswer String?
+  submittedAt      DateTime  @default(now())
+
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// 新人达标勋章
+// ─────────────────────────────────────────────
+model NewbieBadge {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  badgeNo   String   @unique
+  issuedAt  DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
