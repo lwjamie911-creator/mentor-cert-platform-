@@ -21,6 +21,7 @@ const typeConfig: Record<string, { label: string; color: string }> = {
   single:    { label: '单选', color: 'bg-blue-50 text-blue-600' },
   multiple:  { label: '多选', color: 'bg-violet-50 text-violet-600' },
   truefalse: { label: '判断', color: 'bg-amber-50 text-amber-600' },
+  matching:  { label: '连线', color: 'bg-emerald-50 text-emerald-600' },
 }
 
 const difficultyConfig: Record<number, { label: string; color: string }> = {
@@ -40,6 +41,11 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
     content: '',
     optionA: '', optionB: '', optionC: '', optionD: '',
     answer: [] as string[],
+    // matching type: pairs of [left, right]
+    matchingPairs: [
+      { left: '', right: '' },
+      { left: '', right: '' },
+    ] as { left: string; right: string }[],
     explanation: '',
     difficulty: 1,
   })
@@ -61,15 +67,49 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
     })
   }
 
+  function updateMatchingPair(idx: number, side: 'left' | 'right', value: string) {
+    setForm(f => {
+      const pairs = [...f.matchingPairs]
+      pairs[idx] = { ...pairs[idx], [side]: value }
+      return { ...f, matchingPairs: pairs }
+    })
+  }
+
+  function addMatchingPair() {
+    setForm(f => ({ ...f, matchingPairs: [...f.matchingPairs, { left: '', right: '' }] }))
+  }
+
+  function removeMatchingPair(idx: number) {
+    setForm(f => ({ ...f, matchingPairs: f.matchingPairs.filter((_, i) => i !== idx) }))
+  }
+
   async function saveQuestion() {
-    if (!form.content || form.answer.length === 0) return alert('请填写题目内容和正确答案')
+    if (!form.content) return alert('请填写题目内容')
     setSaving(true)
 
-    const options = [form.optionA, form.optionB, form.optionC, form.optionD].filter(Boolean)
-    if (form.type !== 'truefalse' && options.length < 2) {
-      alert('至少填写两个选项')
-      setSaving(false)
-      return
+    let options: string
+    let answer: string
+
+    if (form.type === 'matching') {
+      const validPairs = form.matchingPairs.filter(p => p.left.trim() && p.right.trim())
+      if (validPairs.length < 2) {
+        alert('连线题至少需要 2 对完整的连线对')
+        setSaving(false)
+        return
+      }
+      // options = left items (JSON array), answer = right items in correct order (JSON array)
+      options = JSON.stringify(validPairs.map(p => p.left.trim()))
+      answer  = JSON.stringify(validPairs.map(p => p.right.trim()))
+    } else {
+      if (form.answer.length === 0) return alert('请选择正确答案')
+      const opts = [form.optionA, form.optionB, form.optionC, form.optionD].filter(Boolean)
+      if (form.type !== 'truefalse' && opts.length < 2) {
+        alert('至少填写两个选项')
+        setSaving(false)
+        return
+      }
+      options = JSON.stringify(form.type === 'truefalse' ? ['正确', '错误'] : opts)
+      answer  = JSON.stringify(form.answer)
     }
 
     await fetch('/api/admin/questions', {
@@ -80,8 +120,8 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
         chapterId: scope === 'chapter' ? chapterId : null,
         type: form.type,
         content: form.content,
-        options: JSON.stringify(form.type === 'truefalse' ? ['正确', '错误'] : options),
-        answer: JSON.stringify(form.answer),
+        options,
+        answer,
         explanation: form.explanation || null,
         difficulty: form.difficulty,
       }),
@@ -89,7 +129,13 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
 
     setSaving(false)
     setShowForm(false)
-    setForm({ type: 'single', content: '', optionA: '', optionB: '', optionC: '', optionD: '', answer: [], explanation: '', difficulty: 1 })
+    setForm({
+      type: 'single', content: '',
+      optionA: '', optionB: '', optionC: '', optionD: '',
+      answer: [],
+      matchingPairs: [{ left: '', right: '' }, { left: '', right: '' }],
+      explanation: '', difficulty: 1,
+    })
     router.refresh()
   }
 
@@ -168,6 +214,7 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
                 <option value="single">单选题</option>
                 <option value="multiple">多选题</option>
                 <option value="truefalse">判断题</option>
+                <option value="matching">连线题</option>
               </select>
             </div>
             <div>
@@ -188,8 +235,8 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
               placeholder="请输入题目内容" />
           </div>
 
-          {/* 选项 */}
-          {form.type !== 'truefalse' && (
+          {/* 选项（非连线题） */}
+          {form.type !== 'truefalse' && form.type !== 'matching' && (
             <div>
               <label className={labelCls}>选项</label>
               <div className="grid grid-cols-2 gap-2">
@@ -211,28 +258,74 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
             </div>
           )}
 
-          {/* 正确答案 */}
-          <div>
-            <label className={labelCls}>
-              正确答案{form.type === 'multiple' ? ' (多选，可选多个)' : ''}
-            </label>
-            <div className="flex gap-2 flex-wrap">
-              {(form.type === 'truefalse' ? ['A', 'B'] : ['A', 'B', 'C', 'D']).map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  onClick={() => toggleAnswer(opt)}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
-                    form.answer.includes(opt)
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                      : 'bg-white border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-500'
-                  }`}
-                >
-                  {form.type === 'truefalse' ? (opt === 'A' ? '✓ 正确' : '✗ 错误') : opt}
-                </button>
-              ))}
+          {/* 正确答案（非连线题） */}
+          {form.type !== 'matching' && (
+            <div>
+              <label className={labelCls}>
+                正确答案{form.type === 'multiple' ? ' (多选，可选多个)' : ''}
+              </label>
+              <div className="flex gap-2 flex-wrap">
+                {(form.type === 'truefalse' ? ['A', 'B'] : ['A', 'B', 'C', 'D']).map((opt) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => toggleAnswer(opt)}
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
+                      form.answer.includes(opt)
+                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                        : 'bg-white border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-500'
+                    }`}
+                  >
+                    {form.type === 'truefalse' ? (opt === 'A' ? '✓ 正确' : '✗ 错误') : opt}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* 连线题配对 */}
+          {form.type === 'matching' && (
+            <div>
+              <label className={labelCls}>连线对（左侧 → 右侧，顺序即为正确配对）</label>
+              <div className="space-y-2">
+                {form.matchingPairs.map((pair, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                      {idx + 1}
+                    </span>
+                    <input
+                      value={pair.left}
+                      onChange={e => updateMatchingPair(idx, 'left', e.target.value)}
+                      className={inputCls}
+                      placeholder="左侧项"
+                    />
+                    <span className="text-gray-300 flex-shrink-0">→</span>
+                    <input
+                      value={pair.right}
+                      onChange={e => updateMatchingPair(idx, 'right', e.target.value)}
+                      className={inputCls}
+                      placeholder="右侧项"
+                    />
+                    {form.matchingPairs.length > 2 && (
+                      <button
+                        onClick={() => removeMatchingPair(idx)}
+                        className="flex-shrink-0 w-6 h-6 rounded-full text-gray-400 hover:text-red-400 hover:bg-red-50 transition-colors text-sm"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={addMatchingPair}
+                className="mt-2 text-xs text-emerald-600 hover:text-emerald-700 font-medium"
+              >
+                + 增加一对
+              </button>
+              <p className="text-xs text-gray-400 mt-1">右侧项将在答题时被随机打乱顺序，学员需要将其正确匹配到左侧</p>
+            </div>
+          )}
 
           {/* 解析 */}
           <div>

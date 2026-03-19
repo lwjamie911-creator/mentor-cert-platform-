@@ -81,12 +81,13 @@ model Chapter {
 // ─────────────────────────────────────────────
 model Question {
   id          String    @id @default(cuid())
-  chapterId   String?                         // 关联章节（章节测验）
+  chapterId   String?                         // 关联章节（章节测验，已停用）
   courseId    String?                         // 关联课程（期末考试）
-  type        String                          // single | multiple | truefalse
+  zone        String?                         // mentor | newbie（导师/新人专区题目）
+  type        String                          // single | multiple | truefalse | matching
   content     String
-  options     String                          // JSON: ["选项A","选项B",...]
-  answer      String                          // JSON: ["A"] 或 ["A","B"]
+  options     String                          // JSON: ["选项A","选项B",...] 连线题=左侧项
+  answer      String                          // JSON: ["A"] 或 ["A","B"] 连线题=右侧对应答案（顺序匹配）
   explanation String?                         // 解析
   difficulty  Int       @default(1)           // 1-3
   createdAt   DateTime  @default(now())
@@ -268,4 +269,35 @@ model NewbieBadge {
   issuedAt  DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// 学习资料（导师/新人专区文档）
+// ─────────────────────────────────────────────
+model LearningMaterial {
+  id             String    @id @default(cuid())
+  title          String
+  subject        String                        // 科目标签，如：通用基础、导师专项、新人入职
+  zone           String                        // mentor | newbie | both
+  contentText    String?                       // Markdown 内容
+  minReadSeconds Int       @default(0)         // 最短阅读秒数
+  orderIndex     Int       @default(0)
+  isPublished    Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+
+  progress       LearningProgress[]
+}
+
+// ─────────────────────────────────────────────
+// 学习资料阅读进度
+// ─────────────────────────────────────────────
+model LearningProgress {
+  id           String   @id @default(cuid())
+  userId       String
+  materialId   String
+  completedAt  DateTime @default(now())
+
+  material     LearningMaterial @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, materialId])
 }

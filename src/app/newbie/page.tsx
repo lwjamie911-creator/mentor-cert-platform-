@@ -3,21 +3,30 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { NewbieBindMentor } from './bind-mentor'
 import { NewbieChecklistPanel } from './checklist-panel'
+import { LearningTaskPanel } from '@/components/learning-task-panel'
 import Link from 'next/link'
 
 export default async function NewbiePage() {
   const session = await getServerSession(authOptions)!
 
-  const [checklist, exam, badge] = await Promise.all([
+  const [checklist, exam, badge, materials, learningProgress] = await Promise.all([
     prisma.newbieChecklist.findUnique({ where: { userId: session!.user.id } }),
     prisma.newbieExam.findUnique({ where: { userId: session!.user.id } }),
     prisma.newbieBadge.findUnique({ where: { userId: session!.user.id } }),
+    prisma.learningMaterial.findMany({
+      where: { isPublished: true, zone: { in: ['newbie', 'both'] } },
+      orderBy: [{ orderIndex: 'asc' }],
+    }),
+    prisma.learningProgress.findMany({ where: { userId: session!.user.id } }),
   ])
 
   const allChecksDone = !!(checklist?.allDoneAt)
+  const completedIds = new Set(learningProgress.map(p => p.materialId))
+  const materialsWithProgress = materials.map(m => ({ ...m, completed: completedIds.has(m.id) }))
+  const allMaterialsDone = materials.length === 0 || materialsWithProgress.every(m => m.completed)
 
-  // 进度：3步
-  const progress = [!!checklist, allChecksDone, !!exam?.passed].filter(Boolean).length
+  // 进度：4步
+  const progress = [!!checklist, allChecksDone, allMaterialsDone && allChecksDone, !!exam?.passed].filter(Boolean).length
 
   return (
     <div className="space-y-5">
@@ -33,15 +42,16 @@ export default async function NewbiePage() {
           <div className="flex items-center gap-2 mb-1">
             <div className="flex-1 h-2 bg-white/30 rounded-full overflow-hidden">
               <div className="h-full bg-white rounded-full transition-all duration-700"
-                style={{ width: `${(progress / 3) * 100}%` }} />
+                style={{ width: `${(progress / 4) * 100}%` }} />
             </div>
-            <span className="text-white/80 text-xs font-mono">{progress}/3</span>
+            <span className="text-white/80 text-xs font-mono">{progress}/4</span>
           </div>
           <p className="text-blue-100 text-xs">
             {progress === 0 && '先绑定你的导师，开启成长之旅'}
             {progress === 1 && '导师已绑定！完成 ABC 三项成长指标'}
-            {progress === 2 && '指标达成！参加知识测试获得勋章'}
-            {progress === 3 && '全部完成，你已获得成长勋章 🏅'}
+            {progress === 2 && '指标达成！去学习新人知识资料'}
+            {progress === 3 && '资料学完！参加知识测试获得勋章'}
+            {progress === 4 && '全部完成，你已获得成长勋章 🏅'}
           </p>
         </div>
       </div>
@@ -99,13 +109,25 @@ export default async function NewbiePage() {
         {checklist && <NewbieChecklistPanel userId={session!.user.id} checklist={checklist} />}
       </StepCard>
 
-      {/* 步骤三：知识测试 */}
+      {/* 步骤三：学习资料 */}
       <StepCard
         step={3}
-        title="知识测试"
-        done={!!exam?.passed}
+        title="学习资料"
+        done={allMaterialsDone && allChecksDone}
         locked={!allChecksDone}
         lockedHint="请先完成成长指标"
+        badge={materials.length > 0 ? `${materialsWithProgress.filter(m => m.completed).length}/${materials.length} 篇` : undefined}
+      >
+        <LearningTaskPanel zone="newbie" initialMaterials={materialsWithProgress} />
+      </StepCard>
+
+      {/* 步骤四：知识测试 */}
+      <StepCard
+        step={4}
+        title="知识测试"
+        done={!!exam?.passed}
+        locked={!allChecksDone || !allMaterialsDone}
+        lockedHint={!allChecksDone ? '请先完成成长指标' : '请先完成所有学习资料'}
         doneHint={exam?.passed ? `${exam.score} 分通过` : undefined}
       >
         {exam ? (
@@ -135,8 +157,8 @@ export default async function NewbiePage() {
         ) : (
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1">
-              <p className="text-sm text-gray-500">5 道客观题 + 1 道主观题</p>
-              <p className="text-xs text-gray-400 mt-0.5">客观题 60 分及以上通过，即可获得成长勋章</p>
+              <p className="text-sm text-gray-500">从题库随机抽取题目，含连线题</p>
+              <p className="text-xs text-gray-400 mt-0.5">60 分及以上视为通过，即可获得成长勋章</p>
             </div>
             <Link href="/newbie/exam"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
@@ -153,7 +175,7 @@ export default async function NewbiePage() {
 }
 
 function StepCard({
-  step, title, done, locked, lockedHint, doneHint, children,
+  step, title, done, locked, lockedHint, doneHint, badge, children,
 }: {
   step: number
   title: string
@@ -161,7 +183,8 @@ function StepCard({
   locked: boolean
   lockedHint?: string
   doneHint?: string
-  children: React.ReactNode
+  badge?: string
+  children?: React.ReactNode
 }) {
   return (
     <section className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden
@@ -176,9 +199,13 @@ function StepCard({
         {done && doneHint && (
           <span className="text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full font-medium">{doneHint}</span>
         )}
+        {done && !doneHint && (
+          <span className="text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full font-medium">已完成</span>
+        )}
         {locked && lockedHint && (
           <span className="text-xs text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full">{lockedHint}</span>
         )}
+        {badge && <span className="text-xs text-blue-700 bg-blue-100 px-2.5 py-1 rounded-full font-medium">{badge}</span>}
       </div>
       {!locked && <div className="px-6 py-5">{children}</div>}
     </section>

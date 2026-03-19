@@ -9,9 +9,21 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
   const questions = await prisma.question.findMany({
     where: { courseId: params.id },
-    select: { id: true, type: true, content: true, options: true, difficulty: true },
+    select: { id: true, type: true, content: true, options: true, answer: true, difficulty: true },
   })
 
-  const shuffled = questions.sort(() => Math.random() - 0.5)
-  return NextResponse.json(shuffled)
+  // 连线题把 answer（右侧项）也返回，供前端展示；其他题型 answer 不下发
+  const result = questions
+    .sort(() => Math.random() - 0.5)
+    .map(q => ({
+      id:       q.id,
+      type:     q.type,
+      content:  q.content,
+      options:  JSON.parse(q.options),
+      // 连线题需要右侧选项（存在 answer 字段中）
+      ...(q.type === 'matching' ? { rightItems: JSON.parse(q.answer) } : {}),
+      difficulty: q.difficulty,
+    }))
+
+  return NextResponse.json(result)
 }
