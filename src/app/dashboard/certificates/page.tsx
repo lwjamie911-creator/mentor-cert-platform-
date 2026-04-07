@@ -75,13 +75,11 @@ export default async function CertificatesPage() {
 
                   <Link
                     href={`/dashboard/certificates/${cert.id}`}
-                    className="flex-shrink-0 px-4 py-2 rounded-xl text-xs font-semibold border transition-colors"
-                    style={expired ? undefined : {
-                      borderColor: '#f59e0b',
-                      color: '#b45309',
-                    }}
-                    onMouseEnter={e => { if (!expired) (e.currentTarget as HTMLElement).style.background = '#fffbeb' }}
-                    onMouseLeave={e => { if (!expired) (e.currentTarget as HTMLElement).style.background = '' }}
+                    className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-semibold border transition-colors ${
+                      expired
+                        ? 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                        : 'border-amber-400 text-amber-700 hover:bg-amber-50'
+                    }`}
                   >
                     {expired ? '查看证书' : '🎖 查看 / 下载'}
                   </Link>
