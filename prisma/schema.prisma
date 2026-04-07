@@ -1,6 +1,6 @@
-// 数据库配置：使用 SQLite（一个文件，无需安装数据库服务器）
+// 数据库配置：使用 PostgreSQL（云端部署）
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -191,6 +191,7 @@ model MentorSelfCheck {
   check1      Boolean   @default(false)
   check2      Boolean   @default(false)
   check3      Boolean   @default(false)
+  check4      Boolean   @default(false)
   allDoneAt   DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -279,7 +280,9 @@ model LearningMaterial {
   title          String
   subject        String                        // 科目标签，如：通用基础、导师专项、新人入职
   zone           String                        // mentor | newbie | both
-  contentText    String?                       // Markdown 内容
+  contentType    String    @default("text")    // text | pdf | external_link
+  contentText    String?                       // Markdown 内容（text类型）
+  contentUrl     String?                       // PDF路径 或 外链URL
   minReadSeconds Int       @default(0)         // 最短阅读秒数
   orderIndex     Int       @default(0)
   isPublished    Boolean   @default(true)
