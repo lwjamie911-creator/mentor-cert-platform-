@@ -5,12 +5,10 @@ import Link from 'next/link'
 import { SignOutButton } from '@/components/sign-out-button'
 
 const navItems = [
-  { href: '/admin',              label: '数据看板',    icon: '📊' },
-  { href: '/admin/users',        label: '用户管理',    icon: '👥' },
-  { href: '/admin/courses',      label: '课程管理',    icon: '📚' },
-  { href: '/admin/materials',    label: '学习文档',    icon: '📄' },
-  { href: '/admin/certificates', label: '导师认证证书', icon: '🏆' },
-  { href: '/admin/newbies',      label: '新人成长数据', icon: '🌱' },
+  { href: '/admin',              label: '数据看板', icon: '📊' },
+  { href: '/admin/users',        label: '用户管理', icon: '👥' },
+  { href: '/admin/courses',      label: '课程管理', icon: '📚' },
+  { href: '/admin/certificates', label: '证书管理', icon: '🏆' },
 ]
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

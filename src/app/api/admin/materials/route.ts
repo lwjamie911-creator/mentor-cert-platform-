@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
   if (session?.user.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { title, subject, zone, contentText, minReadSeconds, orderIndex, isPublished } = await req.json()
+  const { title, subject, zone, contentText, contentUrl, contentType, minReadSeconds, orderIndex, isPublished } = await req.json()
   if (!title || !zone) return NextResponse.json({ error: '标题和适用范围不能为空' }, { status: 400 })
 
   const material = await prisma.learningMaterial.create({
@@ -26,7 +26,9 @@ export async function POST(req: Request) {
       title,
       subject: subject || '通用',
       zone,
-      contentText: contentText || '',
+      contentText: contentText || null,
+      contentUrl: contentUrl || null,
+      contentType: contentType || 'text',
       minReadSeconds: minReadSeconds ?? 0,
       orderIndex: orderIndex ?? 0,
       isPublished: isPublished ?? true,

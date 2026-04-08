@@ -7,7 +7,6 @@ export default async function AdminUsersPage() {
     where: { role: 'learner' },
     orderBy: { createdAt: 'desc' },
     include: {
-      enrollments: { select: { status: true } },
       certificates: { select: { id: true } },
     },
   })
@@ -52,15 +51,13 @@ export default async function AdminUsersPage() {
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">姓名</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">邮箱 / 企微ID</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">状态</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">课程报名/完成</th>
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">证书</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">注册时间</th>
+                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">上次登入时间</th>
                 <th className="px-5 py-3"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {users.map((user) => {
-                const completed = user.enrollments.filter((e) => e.status === 'completed').length
                 const wxId = user.email.split('@')[0]
                 return (
                   <tr key={user.id} className="hover:bg-indigo-50/30 transition-colors">
@@ -89,18 +86,13 @@ export default async function AdminUsersPage() {
                         {user.status === 'active' ? '正常' : user.status === 'disabled' ? '禁用' : '待激活'}
                       </span>
                     </td>
-                    <td className="px-5 py-3.5 text-gray-500">
-                      <span className="font-medium text-gray-700">{user.enrollments.length}</span>
-                      <span className="text-gray-300 mx-1">/</span>
-                      <span className="text-green-600 font-medium">{completed}</span>
-                    </td>
                     <td className="px-5 py-3.5">
                       {user.certificates.length > 0
                         ? <span className="text-amber-600 font-medium">{user.certificates.length} 张</span>
                         : <span className="text-gray-300">—</span>}
                     </td>
                     <td className="px-5 py-3.5 text-xs text-gray-400">
-                      {dayjs(user.createdAt).format('YYYY-MM-DD')}
+                      {user.lastLoginAt ? dayjs(user.lastLoginAt).format('YYYY-MM-DD HH:mm') : '—'}
                     </td>
                     <td className="px-5 py-3.5">
                       <UserStatusToggle userId={user.id} status={user.status} />

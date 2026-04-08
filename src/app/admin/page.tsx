@@ -2,18 +2,9 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 
 export default async function AdminDashboard() {
-  const [
-    totalUsers,
-    mentorCertCount,
-    newbieBindCount,
-    newbieBadgeCount,
-    newbieExamPassCount,
-  ] = await Promise.all([
-    prisma.user.count({ where: { role: 'learner' } }),
+  const [mentorCertCount, mentorSelfCheckCount] = await Promise.all([
     prisma.mentorCertificate.count(),
-    prisma.newbieChecklist.count(),
-    prisma.newbieBadge.count(),
-    prisma.newbieExam.count({ where: { passed: true } }),
+    prisma.mentorSelfCheck.count(),
   ])
 
   return (
@@ -21,35 +12,7 @@ export default async function AdminDashboard() {
       {/* 页面标题 */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">数据看板</h1>
-        <p className="text-sm text-gray-400 mt-1">TEG秘书成长平台整体运营概览</p>
-      </div>
-
-      {/* 整体概况 — 大卡片 */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <BigStatCard
-          label="整体用户数"
-          value={totalUsers}
-          href="/admin/users"
-          icon="👥"
-          gradient="from-indigo-500 to-purple-600"
-          note="平台注册学员总数"
-        />
-        <BigStatCard
-          label="导师认证通过数"
-          value={mentorCertCount}
-          href="/admin/certificates"
-          icon="🏆"
-          gradient="from-amber-400 to-orange-500"
-          note="已获得导师认证证书"
-        />
-        <BigStatCard
-          label="新人勋章颁发数"
-          value={newbieBadgeCount}
-          href="/admin/newbies"
-          icon="🏅"
-          gradient="from-blue-500 to-indigo-600"
-          note="已达标的新人数量"
-        />
+        <p className="text-sm text-gray-400 mt-1">TEG秘书成长平台运营概览</p>
       </div>
 
       {/* 双专区详情 */}
@@ -62,40 +25,35 @@ export default async function AdminDashboard() {
             <h2 className="font-bold text-amber-800">导师专区</h2>
           </div>
           <div className="p-5 grid grid-cols-2 gap-3">
-            <MiniStatCard label="认证证书颁发" value={mentorCertCount} href="/admin/certificates" color="amber" />
-            <MiniStatCard label="知识测试通过" value={mentorCertCount} href="/admin/certificates" color="amber" />
+            <MiniStatCard
+              label="完成资质自检人数"
+              value={mentorSelfCheckCount}
+              href="/admin/users"
+              color="amber"
+            />
+            <MiniStatCard
+              label="导师认证颁发数"
+              value={mentorCertCount}
+              href="/admin/certificates"
+              color="amber"
+            />
           </div>
         </section>
 
-        {/* 新人专区 */}
-        <section className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+        {/* 新人专区 — 建设中 */}
+        <section className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm opacity-50">
           <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-50"
-            style={{ background: 'linear-gradient(135deg, #eff6ff, #dbeafe)' }}>
-            <span className="text-lg">🌱</span>
-            <h2 className="font-bold text-blue-800">新人专区</h2>
+            style={{ background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)' }}>
+            <span className="text-lg grayscale">🌱</span>
+            <h2 className="font-bold text-gray-500">新人专区</h2>
+            <span className="ml-auto text-xs bg-gray-100 text-gray-400 px-2.5 py-0.5 rounded-full font-medium">建设中</span>
           </div>
-          <div className="p-5 grid grid-cols-3 gap-3">
-            <MiniStatCard label="已绑定导师" value={newbieBindCount} href="/admin/newbies" color="blue" />
-            <MiniStatCard label="测试通过" value={newbieExamPassCount} href="/admin/newbies" color="blue" />
-            <MiniStatCard label="勋章颁发" value={newbieBadgeCount} href="/admin/newbies" color="blue" />
+          <div className="p-5 flex items-center justify-center h-24 text-gray-400">
+            <span className="text-sm">功能建设中，敬请期待</span>
           </div>
         </section>
       </div>
     </div>
-  )
-}
-
-function BigStatCard({ label, value, href, icon, gradient, note }: {
-  label: string; value: number; href: string; icon: string; gradient: string; note: string
-}) {
-  return (
-    <Link href={href}
-      className={`relative overflow-hidden rounded-2xl p-6 text-white bg-gradient-to-br ${gradient} hover:opacity-95 hover:scale-[1.01] transition-all shadow-sm`}>
-      <div className="absolute top-[-16px] right-[-16px] text-7xl opacity-10">{icon}</div>
-      <div className="text-4xl font-black mb-1">{value}</div>
-      <div className="font-semibold text-sm mb-0.5">{label}</div>
-      <div className="text-xs opacity-70">{note}</div>
-    </Link>
   )
 }
 
