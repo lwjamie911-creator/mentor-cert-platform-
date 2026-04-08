@@ -7,9 +7,9 @@ import { MentorExamClient } from './exam-client'
 export default async function MentorExamPage() {
   const session = await getServerSession(authOptions)
 
-  // 自检未完成不能进入
+  // 四项自检全部完成才能进入
   const selfCheck = await prisma.mentorSelfCheck.findUnique({ where: { userId: session!.user.id } })
-  if (!selfCheck?.check1 || !selfCheck?.check2 || !selfCheck?.check3) {
+  if (!selfCheck?.check1 || !selfCheck?.check2 || !selfCheck?.check3 || !selfCheck?.check4) {
     redirect('/mentor')
   }
 
@@ -17,11 +17,21 @@ export default async function MentorExamPage() {
   const cert = await prisma.mentorCertificate.findUnique({ where: { userId: session!.user.id } })
   if (cert) redirect('/mentor')
 
-  // 随机抽取5道题（从 courseId=null && chapterId=null 的共用题库，或直接从全库抽）
+  // 从导师题库随机抽题：必抽连线题1道 + 其余随机抽取
   const allQuestions = await prisma.question.findMany({
-    select: { id: true, type: true, content: true, options: true },
+    where: { zone: 'mentor' },
+    select: { id: true, type: true, content: true, options: true, answer: true },
   })
-  const shuffled = allQuestions.sort(() => Math.random() - 0.5).slice(0, 5)
 
-  return <MentorExamClient questions={shuffled} />
+  const matchingQs = allQuestions.filter(q => q.type === 'matching')
+  const otherQs    = allQuestions.filter(q => q.type !== 'matching')
+
+  // 打乱其余题目，取4道；加上1道连线题，共5道
+  const shuffledOthers = otherQs.sort(() => Math.random() - 0.5).slice(0, 4)
+  const pickedMatching = matchingQs.sort(() => Math.random() - 0.5).slice(0, 1)
+
+  // 再整体打乱顺序，让连线题位置随机
+  const questions = [...shuffledOthers, ...pickedMatching].sort(() => Math.random() - 0.5)
+
+  return <MentorExamClient questions={questions} />
 }

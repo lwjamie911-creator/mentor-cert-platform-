@@ -18,40 +18,28 @@ async function main() {
     },
   })
 
-  // 测试导师账号（企微ID: mentor_zhang）
   const learnerPwd = await bcrypt.hash('test123', 10)
+
+  // 测试账号1
   const mentor = await prisma.user.upsert({
-    where: { email: 'mentor_zhang@tencent.com' },
+    where: { email: 'testuser1@example.com' },
     update: {},
     create: {
-      name: '张导师',
-      email: 'mentor_zhang@tencent.com',
+      name: 'testuser1',
+      email: 'testuser1@example.com',
       password: learnerPwd,
       role: 'learner',
       status: 'active',
     },
   })
 
-  // 测试新人账号（企微ID: newbie_li）
+  // 测试账号2
   const newbie = await prisma.user.upsert({
-    where: { email: 'newbie_li@tencent.com' },
+    where: { email: 'testuser2@example.com' },
     update: {},
     create: {
-      name: '李新人',
-      email: 'newbie_li@tencent.com',
-      password: learnerPwd,
-      role: 'learner',
-      status: 'active',
-    },
-  })
-
-  // 旧测试学员保留（兼容）
-  await prisma.user.upsert({
-    where: { email: 'test@example.com' },
-    update: {},
-    create: {
-      name: '测试学员',
-      email: 'test@example.com',
+      name: 'testuser2',
+      email: 'testuser2@example.com',
       password: learnerPwd,
       role: 'learner',
       status: 'active',
@@ -249,14 +237,13 @@ GROW 是国际通用的辅导模型，包含四个步骤：
   })
 
   console.log('✅ 种子数据创建成功')
-  console.log('管理员账号:   admin@example.com      / admin123')
-  console.log('测试导师:     mentor_zhang@tencent.com / test123  (企微ID: mentor_zhang)')
-  console.log('测试新人:     newbie_li@tencent.com    / test123  (企微ID: newbie_li)')
-  console.log('旧测试学员:   test@example.com         / test123')
+  console.log('管理员账号:   admin@example.com     / admin123')
+  console.log('测试账号1:    testuser1@example.com / test123')
+  console.log('测试账号2:    testuser2@example.com / test123')
   console.log('')
   console.log('💡 测试导师-新人交互流程：')
-  console.log('   1. 新人登录 → 新人专区 → 绑定导师（输入 mentor_zhang）')
-  console.log('   2. 导师登录 → 导师专区 → 完成自检 → 完成测试 → 我的新人中确认 ABC 指标')
+  console.log('   1. testuser2 登录 → 新人专区 → 绑定导师（输入 testuser1 的企微ID）')
+  console.log('   2. testuser1 登录 → 导师专区 → 完成自检 → 完成测试 → 我的新人中确认 ABC 指标')
 }
 
 main()

@@ -12,6 +12,7 @@ export async function POST(req: Request) {
   if (body.check1) data.check1 = true
   if (body.check2) data.check2 = true
   if (body.check3) data.check3 = true
+  if (body.check4) data.check4 = true
 
   const existing = await prisma.mentorSelfCheck.findUnique({ where: { userId: session.user.id } })
   let record
@@ -21,8 +22,8 @@ export async function POST(req: Request) {
     record = await prisma.mentorSelfCheck.create({ data })
   }
 
-  // 检查是否三项全部完成
-  if (record.check1 && record.check2 && record.check3 && !record.allDoneAt) {
+  // 检查是否四项全部完成
+  if (record.check1 && record.check2 && record.check3 && record.check4 && !record.allDoneAt) {
     await prisma.mentorSelfCheck.update({
       where: { userId: session.user.id },
       data: { allDoneAt: new Date() },

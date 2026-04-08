@@ -2,20 +2,26 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { MatchingQuestion } from '@/components/matching-question'
 
 interface Question {
   id: string
   type: string
   content: string
   options: string
+  answer: string
 }
 
 export function MentorExamClient({ questions }: { questions: Question[] }) {
-  const [answers, setAnswers] = useState<Record<string, string | string[]>>({})
+  const [answers, setAnswers] = useState<Record<string, any>>({})
   const [result, setResult] = useState<any>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  function handleAnswer(qId: string, opt: string, type: string) {
+  function handleAnswer(qId: string, val: any) {
+    setAnswers(prev => ({ ...prev, [qId]: val }))
+  }
+
+  function handleChoiceAnswer(qId: string, opt: string, type: string) {
     if (type === 'multiple') {
       setAnswers(prev => {
         const cur = (prev[qId] as string[]) || []
@@ -24,6 +30,16 @@ export function MentorExamClient({ questions }: { questions: Question[] }) {
     } else {
       setAnswers(prev => ({ ...prev, [qId]: opt }))
     }
+  }
+
+  function isAnswered(q: Question): boolean {
+    const a = answers[q.id]
+    if (q.type === 'matching') {
+      const opts: string[] = JSON.parse(q.options)
+      return typeof a === 'object' && a !== null && Object.keys(a).length === opts.length
+    }
+    if (q.type === 'multiple') return Array.isArray(a) && a.length > 0
+    return a !== undefined
   }
 
   async function handleSubmit() {
@@ -38,14 +54,13 @@ export function MentorExamClient({ questions }: { questions: Question[] }) {
     setSubmitting(false)
   }
 
-  const answeredCount = Object.keys(answers).length
+  const answeredCount = questions.filter(q => isAnswered(q)).length
 
-  // 结果页
+  // ── 结果页 ──
   if (result) {
     const passed = result.passed
     return (
       <div className="max-w-lg mx-auto text-center py-8">
-        {/* 大分数展示 */}
         <div className={`rounded-3xl p-10 mb-6 relative overflow-hidden ${passed
           ? 'bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200'
           : 'bg-gradient-to-br from-gray-50 to-slate-100 border border-gray-200'}`}>
@@ -60,7 +75,7 @@ export function MentorExamClient({ questions }: { questions: Question[] }) {
           </div>
           <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold mt-2
             ${passed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
-            {passed ? '✓ 通过' : '✗ 未通过（需 60 分）'}
+            {passed ? '✓ 通过' : '✗ 未通过（需 80 分）'}
           </div>
         </div>
 
@@ -88,14 +103,15 @@ export function MentorExamClient({ questions }: { questions: Question[] }) {
     )
   }
 
+  // ── 答题页 ──
   return (
     <div className="max-w-2xl mx-auto">
-      {/* 顶部进度条 */}
+      {/* 顶部进度 */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <div>
             <h1 className="text-xl font-bold text-gray-900">导师知识测试</h1>
-            <p className="text-sm text-gray-400 mt-0.5">共 {questions.length} 题 · 60 分及以上通过</p>
+            <p className="text-sm text-gray-400 mt-0.5">共 {questions.length} 题 · 80 分及以上通过</p>
           </div>
           <div className="text-right">
             <span className="text-2xl font-black text-amber-500">{answeredCount}</span>
@@ -115,52 +131,74 @@ export function MentorExamClient({ questions }: { questions: Question[] }) {
       {/* 题目列表 */}
       <div className="space-y-4 mb-6">
         {questions.map((q, i) => {
-          const options: string[] = JSON.parse(q.options)
-          const selected = answers[q.id]
-          const isAnswered = selected !== undefined && (Array.isArray(selected) ? selected.length > 0 : true)
-          const typeLabel = q.type === 'multiple' ? '多选' : q.type === 'truefalse' ? '判断' : '单选'
+          const answered = isAnswered(q)
+          const typeLabel = { single: '单选', multiple: '多选', truefalse: '判断', matching: '连线' }[q.type] ?? q.type
 
           return (
             <div key={q.id} className={`bg-white rounded-2xl border-2 p-5 transition-all duration-200
-              ${isAnswered ? 'border-amber-200' : 'border-gray-100 hover:border-gray-200'}`}>
+              ${answered ? 'border-amber-200' : 'border-gray-100 hover:border-gray-200'}`}>
+
+              {/* 题目头 */}
               <div className="flex items-start gap-3 mb-4">
                 <span className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
-                  ${isAnswered ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-400'}`}>
-                  {isAnswered ? '✓' : i + 1}
+                  ${answered ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                  {answered ? '✓' : i + 1}
                 </span>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900 leading-relaxed">{q.content}</p>
                   <span className="inline-block mt-1 text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">{typeLabel}</span>
                 </div>
               </div>
-              <div className="space-y-2 pl-10">
-                {options.map((opt, oi) => {
-                  const key = String.fromCharCode(65 + oi)
-                  const isSelected = q.type === 'multiple'
-                    ? ((selected as string[]) || []).includes(key)
-                    : selected === key
-                  return (
-                    <label key={oi} className={`flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer transition-all
-                      ${isSelected
-                        ? 'bg-amber-50 border-2 border-amber-300 text-amber-900'
-                        : 'border-2 border-gray-100 hover:border-amber-100 hover:bg-amber-50/50 text-gray-700'}`}>
-                      <span className={`w-5 h-5 rounded flex items-center justify-center text-xs font-bold flex-shrink-0
-                        ${isSelected ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-400'}`}>
-                        {key}
-                      </span>
-                      <input
-                        type={q.type === 'multiple' ? 'checkbox' : 'radio'}
-                        name={q.id}
-                        value={key}
-                        checked={isSelected}
-                        onChange={() => handleAnswer(q.id, key, q.type)}
-                        className="sr-only"
-                      />
-                      <span className="text-sm">{opt}</span>
-                    </label>
-                  )
-                })}
-              </div>
+
+              {/* 连线题 */}
+              {q.type === 'matching' && (() => {
+                const leftItems: string[]  = JSON.parse(q.options)
+                const rightItems: string[] = JSON.parse(q.answer)
+                return (
+                  <div className="pl-10">
+                    <p className="text-xs text-gray-400 mb-3">点击左侧项，再点击右侧对应项完成连线</p>
+                    <MatchingQuestion
+                      questionId={q.id}
+                      leftItems={leftItems}
+                      rightItems={rightItems}
+                      value={answers[q.id]}
+                      onChange={val => handleAnswer(q.id, val)}
+                    />
+                  </div>
+                )
+              })()}
+
+              {/* 选择题 / 判断题 */}
+              {q.type !== 'matching' && (
+                <div className="space-y-2 pl-10">
+                  {(JSON.parse(q.options) as string[]).map((opt, oi) => {
+                    const key = String.fromCharCode(65 + oi)
+                    const selected = q.type === 'multiple'
+                      ? ((answers[q.id] as string[]) || []).includes(key)
+                      : answers[q.id] === key
+                    return (
+                      <label key={oi} className={`flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer transition-all
+                        ${selected
+                          ? 'bg-amber-50 border-2 border-amber-300 text-amber-900'
+                          : 'border-2 border-gray-100 hover:border-amber-100 hover:bg-amber-50/50 text-gray-700'}`}>
+                        <span className={`w-5 h-5 rounded flex items-center justify-center text-xs font-bold flex-shrink-0
+                          ${selected ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                          {key}
+                        </span>
+                        <input
+                          type={q.type === 'multiple' ? 'checkbox' : 'radio'}
+                          name={q.id}
+                          value={key}
+                          checked={selected}
+                          onChange={() => handleChoiceAnswer(q.id, key, q.type)}
+                          className="sr-only"
+                        />
+                        <span className="text-sm">{opt}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )
         })}

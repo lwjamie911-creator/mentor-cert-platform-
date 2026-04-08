@@ -17,7 +17,6 @@ export default async function MentorCertificatePage() {
   return (
     <MentorCertPrintView
       name={cert.user.name}
-      wxId={cert.user.email.split('@')[0]}
       certificateNo={cert.certificateNo}
       score={cert.score}
       issuedDate={dayjs(cert.issuedAt).format('YYYY年MM月DD日')}
