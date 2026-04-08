@@ -284,17 +284,17 @@ function CourseRoom({
           <span className="text-2xl">🎉</span>
           <div>
             <p className="text-sm font-semibold text-green-700">本课程已完成学习</p>
-            {material.contentType === 'text' ? (
-              <a href={`/mentor/learn/${material.id}`}
-                className="text-xs text-green-600 underline hover:no-underline mt-0.5 block">
-                点此复习 →
-              </a>
-            ) : material.contentUrl ? (
+            {material.contentUrl ? (
               <button
                 onClick={() => window.open(material.contentUrl!, '_blank', 'noopener')}
                 className="text-xs text-green-600 underline hover:no-underline mt-0.5"
               >点此复习 ↗</button>
-            ) : null}
+            ) : (
+              <a href={`/mentor/learn/${material.id}`}
+                className="text-xs text-green-600 underline hover:no-underline mt-0.5 block">
+                点此复习 →
+              </a>
+            )}
           </div>
         </div>
       ) : (
@@ -317,7 +317,7 @@ function CourseRoom({
 
           {/* 未打开：只显示打开按钮 */}
           {!linkOpened ? (
-            material.contentType === 'text' ? (
+            !material.contentUrl ? (
               <Link
                 href={`/mentor/learn/${material.id}`}
                 className={`block w-full py-3 rounded-xl text-white text-center text-sm font-semibold transition-all active:scale-[0.98] ${theme.btn}`}
