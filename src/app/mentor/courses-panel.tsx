@@ -220,8 +220,8 @@ export function MentorCoursesPanel({ userId, initialMaterials }: Props) {
                 }
               </button>
 
-              {/* 展开面板 */}
-              {isOpen && (
+              {/* 展开面板：已完成时始终展示复习入口；未完成时按点击展开 */}
+              {(isOpen || m.completed) && (
                 <CourseRoom
                   material={m}
                   theme={theme}
