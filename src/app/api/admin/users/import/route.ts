@@ -56,8 +56,8 @@ export async function POST(req: Request) {
       continue
     }
 
-    // 初始密码 = 企业微信ID（不含括号部分）
-    const hashed = await bcrypt.hash(wxId, 10)
+    // 初始密码 = 123456
+    const hashed = await bcrypt.hash('123456', 10)
 
     await prisma.user.create({
       data: { name, email, password: hashed, status: 'active' },

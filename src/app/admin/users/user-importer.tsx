@@ -120,7 +120,7 @@ export function UserImporter() {
           {/* 新建账号提示 */}
           {response.created > 0 && (
             <div className="bg-blue-50 rounded-lg px-4 py-3 text-sm text-blue-700">
-              初始密码 = 各自企业微信ID（括号前的部分），请告知学员登录后修改密码。
+              初始密码统一为 123456，请告知学员登录后修改密码。
             </div>
           )}
 
