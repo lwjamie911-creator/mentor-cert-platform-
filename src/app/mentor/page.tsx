@@ -1,9 +1,13 @@
+export const dynamic = 'force-dynamic'
+
+export const dynamic = 'force-dynamic'
+
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { MentorSelfCheckPanel } from './self-check-panel'
 import { MentorNewbieList } from './newbie-list'
-import { LearningTaskPanel } from '@/components/learning-task-panel'
+import { MentorCoursesPanel } from './courses-panel'
 import Link from 'next/link'
 import dayjs from 'dayjs'
 
@@ -33,7 +37,7 @@ export default async function MentorPage() {
     prisma.learningProgress.findMany({ where: { userId: session!.user.id } }),
   ])
 
-  const selfCheckDone = selfCheck?.check1 && selfCheck?.check2 && selfCheck?.check3
+  const selfCheckDone = selfCheck?.check1 && selfCheck?.check2 && selfCheck?.check3 && selfCheck?.check4
   const completedIds  = new Set(learningProgress.map(p => p.materialId))
   const materialsWithProgress = materials.map(m => ({ ...m, completed: completedIds.has(m.id) }))
   const allMaterialsDone = materials.length === 0 || materialsWithProgress.every(m => m.completed)
@@ -45,11 +49,11 @@ export default async function MentorPage() {
     return acc + (['A', 'B', 'C'] as const).filter(k => cl[`check${k}_self`] && !cl[`check${k}_mentor`]).length
   }, 0)
 
-  // 4步进度：自检 → 学习 → 测试 → 新人
-  const progress = [selfCheckDone, allMaterialsDone && selfCheckDone, !!mentorCert, pairs.length > 0].filter(Boolean).length
+  // 进度：自检 → 学习 → 认证
+  const certProgress = [selfCheckDone, allMaterialsDone && selfCheckDone, !!mentorCert].filter(Boolean).length
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
 
       {/* Hero */}
       <div className="rounded-2xl p-6 text-white relative overflow-hidden"
@@ -62,16 +66,15 @@ export default async function MentorPage() {
           <div className="flex items-center gap-2 mb-1">
             <div className="flex-1 h-2 bg-white/30 rounded-full overflow-hidden">
               <div className="h-full bg-white rounded-full transition-all duration-700"
-                style={{ width: `${(progress / 4) * 100}%` }} />
+                style={{ width: `${(certProgress / 3) * 100}%` }} />
             </div>
-            <span className="text-white/80 text-xs font-mono">{progress}/4</span>
+            <span className="text-white/80 text-xs font-mono">{certProgress}/3</span>
           </div>
           <p className="text-amber-100 text-xs">
-            {progress === 0 && '从导师资质自检开始你的认证之旅'}
-            {progress === 1 && '自检完成！去学习导师知识资料'}
-            {progress === 2 && '资料学完！参加导师知识测试'}
-            {progress === 3 && '认证完成！开始管理你的新人吧'}
-            {progress === 4 && '全部完成，你是一位认证导师 ✨'}
+            {certProgress === 0 && '从资质自检开始，加入 TEG 秘书中心导师池'}
+            {certProgress === 1 && '自检完成！去学习必修课程'}
+            {certProgress === 2 && '课程学完！参加导师认证测试'}
+            {certProgress === 3 && '🎉 认证完成！已加入导师池，现在管理你的新人吧'}
           </p>
         </div>
       </div>
@@ -87,86 +90,124 @@ export default async function MentorPage() {
         </div>
       )}
 
-      {/* 步骤一：自检 */}
-      <StepCard step={1} title="导师资质自检" done={!!selfCheckDone} locked={false} accentColor="amber">
-        <MentorSelfCheckPanel
-          userId={session!.user.id}
-          initialCheck={selfCheck ? { check1: selfCheck.check1, check2: selfCheck.check2, check3: selfCheck.check3 } : null}
-        />
-      </StepCard>
+      {/* ═══════════════════════════════════════════ */}
+      {/* 第一块：加入 TEG 秘书中心导师池              */}
+      {/* ═══════════════════════════════════════════ */}
+      <div>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-1 h-6 rounded-full bg-amber-400" />
+          <h2 className="text-base font-bold text-gray-900">加入 TEG 秘书中心导师池</h2>
+          {mentorCert && (
+            <span className="ml-auto text-xs text-green-600 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full font-medium">✓ 已加入</span>
+          )}
+        </div>
 
-      {/* 步骤二：学习任务 */}
-      <StepCard
-        step={2}
-        title="学习资料"
-        done={allMaterialsDone && !!selfCheckDone}
-        locked={!selfCheckDone}
-        lockedHint="请先完成资质自检"
-        accentColor="amber"
-        badge={materials.length > 0 ? `${materialsWithProgress.filter(m => m.completed).length}/${materials.length} 篇` : undefined}
-      >
-        <LearningTaskPanel zone="mentor" initialMaterials={materialsWithProgress} />
-      </StepCard>
+        <div className="space-y-4">
+          {/* 步骤一：资质自检 */}
+          <StepCard step={1} title="导师资质自检" done={!!selfCheckDone} locked={false} accentColor="amber">
+            <MentorSelfCheckPanel
+              userId={session!.user.id}
+              initialCheck={selfCheck ? {
+                check1: selfCheck.check1,
+                check2: selfCheck.check2,
+                check3: selfCheck.check3,
+                check4: selfCheck.check4,
+              } : null}
+            />
+          </StepCard>
 
-      {/* 步骤三：知识测试 */}
-      <StepCard
-        step={3}
-        title="导师知识测试"
-        done={!!mentorCert}
-        locked={!selfCheckDone || !allMaterialsDone}
-        lockedHint={!selfCheckDone ? '请先完成资质自检' : '请先完成所有学习资料'}
-        accentColor="amber"
-      >
-        {mentorCert ? (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex-1">
-              <p className="text-sm text-gray-500 mb-1">考试得分</p>
-              <p className="text-3xl font-bold text-amber-600">{mentorCert.score} <span className="text-base font-normal text-gray-400">分</span></p>
-              <p className="text-xs text-gray-400 mt-1">证书有效期至 {dayjs(mentorCert.expiresAt).format('YYYY年MM月DD日')}</p>
+          {/* 步骤二：TEG 秘书中心导师必学 */}
+          <StepCard
+            step={2}
+            title="TEG 秘书中心导师必学"
+            done={allMaterialsDone && !!selfCheckDone}
+            locked={!selfCheckDone}
+            lockedHint="请先完成资质自检"
+            accentColor="amber"
+            badge={materials.length > 0 ? `${materialsWithProgress.filter(m => m.completed).length}/${materials.length} 门` : undefined}
+          >
+            <MentorCoursesPanel userId={session!.user.id} initialMaterials={materialsWithProgress} />
+          </StepCard>
+
+          {/* 步骤三：导师测试与认证 */}
+          <StepCard
+            step={3}
+            title="导师测试与认证"
+            done={!!mentorCert}
+            locked={!selfCheckDone || !allMaterialsDone}
+            lockedHint={!selfCheckDone ? '请先完成资质自检' : '请先完成所有必学课程'}
+            accentColor="amber"
+          >
+            {mentorCert ? (
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="flex-1">
+                  <p className="text-sm text-gray-500 mb-1">考试得分</p>
+                  <p className="text-3xl font-bold text-amber-600">{mentorCert.score} <span className="text-base font-normal text-gray-400">分</span></p>
+                  <p className="text-xs text-gray-400 mt-1">证书有效期至 {dayjs(mentorCert.expiresAt).format('YYYY年MM月DD日')}</p>
+                </div>
+                <Link href="/mentor/certificate"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-amber-700 border-2 border-amber-300 hover:bg-amber-50 transition-colors">
+                  🏆 查看认证证书
+                </Link>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="flex-1">
+                  <p className="text-sm text-gray-500">共 5 题，将从题库随机抽取，所有问题内容均来自 TEG 秘书中心导师必学课程</p>
+                  <p className="text-xs text-gray-400 mt-0.5">80 分及以上视为通过，即时颁发导师认证证书</p>
+                </div>
+                <Link href="/mentor/exam"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+                  style={{ background: 'linear-gradient(90deg,#f59e0b,#fb923c)' }}>
+                  开始测试 →
+                </Link>
+              </div>
+            )}
+          </StepCard>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* 第二块：新人学习跟踪及任务验收               */}
+      {/* ═══════════════════════════════════════════ */}
+      <div className="relative">
+        {/* 建设中遮罩 */}
+        <div className="absolute inset-0 rounded-2xl z-10 pointer-events-none"
+          style={{ background: 'rgba(249,250,251,0.55)', backdropFilter: 'blur(1px)' }} />
+
+        <div className="relative">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-1 h-6 rounded-full bg-gray-300" />
+            <h2 className="text-base font-bold text-gray-400">新人学习跟踪及任务验收</h2>
+            <div className="flex items-center gap-1.5 ml-auto bg-gray-100 text-gray-400 text-xs font-medium px-3 py-1 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-pulse" />
+              建设中，敬请期待
             </div>
-            <Link href="/mentor/certificate"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-amber-700 border-2 border-amber-300 hover:bg-amber-50 transition-colors">
-              🏆 查看认证证书
-            </Link>
           </div>
-        ) : (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex-1">
-              <p className="text-sm text-gray-500">从题库随机抽取题目，含连线题</p>
-              <p className="text-xs text-gray-400 mt-0.5">60 分及以上视为通过，可立即颁发证书</p>
-            </div>
-            <Link href="/mentor/exam"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: 'linear-gradient(90deg,#f59e0b,#fb923c)' }}>
-              开始测试 →
-            </Link>
-          </div>
-        )}
-      </StepCard>
 
-      {/* 步骤四：我的新人 */}
-      <StepCard
-        step={4}
-        title="我的新人"
-        done={false}
-        locked={!mentorCert}
-        lockedHint="请先完成认证测试"
-        accentColor="blue"
-        badge={pendingConfirmCount > 0 ? `${pendingConfirmCount} 项待确认` : undefined}
-      >
-        <MentorNewbieList
-          mentorId={session!.user.id}
-          pairs={pairs.map(p => ({
-            id: p.id,
-            newbieId: p.newbie.id,
-            newbieName: p.newbie.name,
-            newbieEmail: p.newbie.email,
-            checklist: p.newbie.newbieChecklist,
-            exam: p.newbie.newbieExam,
-            badge: p.newbie.newbieBadge,
-          }))}
-        />
-      </StepCard>
+          <StepCard
+            step={4}
+            title="我的新人"
+            done={false}
+            locked={!mentorCert}
+            lockedHint="请先完成认证，加入导师池后解锁"
+            accentColor="blue"
+          >
+            <MentorNewbieList
+              mentorId={session!.user.id}
+              pairs={pairs.map(p => ({
+                id: p.id,
+                newbieId: p.newbie.id,
+                newbieName: p.newbie.name,
+                newbieEmail: p.newbie.email,
+                checklist: p.newbie.newbieChecklist,
+                exam: p.newbie.newbieExam,
+                badge: p.newbie.newbieBadge,
+              }))}
+            />
+          </StepCard>
+        </div>
+      </div>
 
     </div>
   )
