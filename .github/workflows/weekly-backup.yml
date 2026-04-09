@@ -1,0 +1,80 @@
+name: Weekly Database Backup
+
+on:
+  schedule:
+    # 每周一早上9点（北京时间 = UTC+8，所以UTC 01:00）
+    - cron: '0 1 * * 1'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Export backup via API
+        env:
+          POSTGRES_PRISMA_URL: ${{ secrets.POSTGRES_PRISMA_URL }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+        run: |
+          npx tsx -e "
+          const { PrismaClient } = require('@prisma/client')
+          const fs = require('fs')
+          const path = require('path')
+
+          const prisma = new PrismaClient()
+
+          async function main() {
+            const [users, materials, selfChecks, certs, progress] = await Promise.all([
+              prisma.user.findMany({
+                select: { id: true, name: true, email: true, role: true, status: true, createdAt: true, lastLoginAt: true },
+                orderBy: { createdAt: 'asc' },
+              }),
+              prisma.learningMaterial.findMany({ orderBy: { orderIndex: 'asc' } }),
+              prisma.mentorSelfCheck.findMany(),
+              prisma.mentorCertificate.findMany({
+                include: { user: { select: { name: true, email: true } } },
+                orderBy: { issuedAt: 'desc' },
+              }),
+              prisma.learningProgress.findMany(),
+            ])
+
+            const backup = {
+              exportedAt: new Date().toISOString(),
+              summary: {
+                users: users.length,
+                materials: materials.length,
+                selfChecks: selfChecks.length,
+                certificates: certs.length,
+                progressRecords: progress.length,
+              },
+              data: { users, materials, selfChecks, certificates: certs, learningProgress: progress },
+            }
+
+            const dir = 'backups'
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir)
+            const filename = path.join(dir, \`backup-\${new Date().toISOString().slice(0,10)}.json\`)
+            fs.writeFileSync(filename, JSON.stringify(backup, null, 2))
+            console.log('备份完成：', filename)
+            console.log('用户数：', users.length, '| 证书数：', certs.length)
+          }
+
+          main().catch(e => { console.error(e); process.exit(1) }).finally(() => prisma.\$disconnect())
+          "
+
+      - name: Commit backup file
+        run: |
+          git config user.name 'GitHub Actions'
+          git config user.email 'actions@github.com'
+          git add backups/
+          git diff --staged --quiet || git commit -m "chore: weekly backup $(date +%Y-%m-%d)"
+          git push

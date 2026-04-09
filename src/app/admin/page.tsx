@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import { BackupButton } from './backup-button'
 
 export default async function AdminDashboard() {
   const [mentorCertCount, mentorSelfCheckCount] = await Promise.all([
@@ -13,6 +14,11 @@ export default async function AdminDashboard() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">数据看板</h1>
         <p className="text-sm text-gray-400 mt-1">TEG秘书成长平台运营概览</p>
+      </div>
+
+      {/* 备份按钮 */}
+      <div className="flex justify-end">
+        <BackupButton />
       </div>
 
       {/* 双专区详情 */}
