@@ -170,7 +170,7 @@ export function MentorCoursesPanel({ userId, initialMaterials }: Props) {
           const theme = COURSE_THEMES[idx % COURSE_THEMES.length]
           const isOpen = activeId === m.id
           const cs = courseStates[m.id] ?? { linkOpened: false, awaySeconds: 0, isAway: false }
-          const minMin = m.minReadSeconds > 0 ? 10 : null  // 页面显示预估10分钟，实际计时由 minReadSeconds 控制
+          const minMin = m.minReadSeconds > 0 ? Math.ceil(m.minReadSeconds / 60) : null
           const isLocked = hasTracking && trackingId !== m.id && !m.completed
           const readDone = cs.awaySeconds >= m.minReadSeconds
 
@@ -309,7 +309,7 @@ function CourseRoom({
                 : '课程链接将在新标签页打开。系统会追踪你在阅读窗口的时长，切回此页计时自动暂停。'}
               {minSec > 0 && (
                 <span className="block text-xs text-gray-400 mt-1">
-                  ⏱ 需在阅读窗口累计停留至少 10 分钟
+                  ⏱ 需在阅读窗口累计停留至少 {Math.ceil(minSec / 60)} 分钟
                 </span>
               )}
             </div>
