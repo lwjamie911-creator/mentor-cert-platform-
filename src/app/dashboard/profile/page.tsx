@@ -46,9 +46,9 @@ export default function ProfilePage() {
     <div className="space-y-6">
       {/* 页头 */}
       <div>
-        <Link href="/dashboard"
+        <Link href="/zone"
           className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-indigo-600 transition-colors mb-3">
-          ← 返回课程列表
+          ← 返回首页
         </Link>
         <h1 className="text-2xl font-bold text-gray-900">个人设置</h1>
       </div>
