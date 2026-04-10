@@ -18,8 +18,17 @@ export default async function ZonePage() {
             <span className="text-xl">🌱</span>
             <span className="font-bold text-gray-900 text-sm">TEG秘书成长平台</span>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-gray-500 hidden sm:block">{session.user.name}</span>
+          <div className="flex items-center gap-2 text-sm">
+            <Link
+              href="/dashboard/profile"
+              className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl hover:bg-gray-100 transition-colors"
+              title="个人设置 / 修改密码"
+            >
+              <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">
+                {session.user.name?.[0]?.toUpperCase() ?? '?'}
+              </div>
+              <span className="text-gray-500 hidden sm:block">{session.user.name}</span>
+            </Link>
             <SignOutButton />
           </div>
         </div>

@@ -27,8 +27,17 @@ export default async function MentorLayout({ children }: { children: React.React
               <span className="font-bold text-gray-900 text-sm">导师专区</span>
             </div>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-gray-400 hidden sm:block">{session.user.name}</span>
+          <div className="flex items-center gap-2 text-sm">
+            <Link
+              href="/dashboard/profile"
+              className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl hover:bg-amber-50 transition-colors"
+              title="个人设置 / 修改密码"
+            >
+              <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-xs">
+                {session.user.name?.[0]?.toUpperCase() ?? '?'}
+              </div>
+              <span className="text-gray-500 hidden sm:block">{session.user.name}</span>
+            </Link>
             <SignOutButton />
           </div>
         </div>
