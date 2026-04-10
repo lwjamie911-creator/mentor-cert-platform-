@@ -40,10 +40,12 @@ export default async function AdminMaterialsPage() {
         title: m.title,
         subject: m.subject,
         zone: m.zone,
+        contentType: m.contentType,
+        contentText: m.contentText,
+        contentUrl: m.contentUrl,
         minReadSeconds: m.minReadSeconds,
         orderIndex: m.orderIndex,
         isPublished: m.isPublished,
-        contentText: m.contentText,
         _count: { progress: m._count.progress },
       }))} />
     </div>

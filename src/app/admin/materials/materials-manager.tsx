@@ -7,10 +7,12 @@ interface Material {
   title: string
   subject: string
   zone: string
+  contentType: string
+  contentText: string | null
+  contentUrl: string | null
   minReadSeconds: number
   orderIndex: number
   isPublished: boolean
-  contentText: string | null
   _count?: { progress: number }
 }
 
@@ -29,8 +31,9 @@ export function MaterialsManager({ initialMaterials }: { initialMaterials: Mater
 
   // blank form
   const blank: Omit<Material, 'id' | '_count'> = {
-    title: '', subject: '', zone: 'mentor', minReadSeconds: 0,
-    orderIndex: (materials.length) * 10, isPublished: true, contentText: '',
+    title: '', subject: '', zone: 'mentor', contentType: 'text',
+    contentText: '', contentUrl: '', minReadSeconds: 0,
+    orderIndex: (materials.length) * 10, isPublished: true,
   }
   const [form, setForm] = useState<typeof blank>(blank)
 
@@ -43,8 +46,11 @@ export function MaterialsManager({ initialMaterials }: { initialMaterials: Mater
   function openEdit(m: Material) {
     setForm({
       title: m.title, subject: m.subject, zone: m.zone,
+      contentType: m.contentType ?? 'text',
+      contentText: m.contentText ?? '',
+      contentUrl: m.contentUrl ?? '',
       minReadSeconds: m.minReadSeconds, orderIndex: m.orderIndex,
-      isPublished: m.isPublished, contentText: m.contentText ?? '',
+      isPublished: m.isPublished,
     })
     setEditing(m)
     setCreating(false)
@@ -187,17 +193,60 @@ export function MaterialsManager({ initialMaterials }: { initialMaterials: Mater
               </div>
             </div>
 
-            {/* 内容 (Markdown) */}
+            {/* 内容类型 */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">正文内容（Markdown）</label>
-              <textarea
-                value={form.contentText ?? ''}
-                onChange={e => setForm(f => ({ ...f, contentText: e.target.value }))}
-                rows={10}
-                placeholder="支持 Markdown 格式：**粗体**、# 标题、- 列表、> 引用……"
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 font-mono leading-relaxed resize-y"
-              />
+              <label className="block text-xs font-medium text-gray-500 mb-1">内容类型 *</label>
+              <div className="flex gap-2">
+                {[
+                  { value: 'text', label: '📝 Markdown 正文' },
+                  { value: 'external_link', label: '🔗 外部链接' },
+                  { value: 'pdf', label: '📄 PDF 链接' },
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, contentType: opt.value }))}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                      form.contentType === opt.value
+                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {/* 链接地址（外链/PDF 时显示） */}
+            {(form.contentType === 'external_link' || form.contentType === 'pdf') && (
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  {form.contentType === 'pdf' ? 'PDF 地址 *' : '外链地址 *'}
+                </label>
+                <input
+                  value={form.contentUrl ?? ''}
+                  onChange={e => setForm(f => ({ ...f, contentUrl: e.target.value }))}
+                  placeholder={form.contentType === 'pdf' ? 'https://example.com/file.pdf' : 'https://docs.example.com/...'}
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 font-mono"
+                />
+                <p className="text-xs text-gray-400 mt-0.5">用户点击后将在新标签页打开此地址</p>
+              </div>
+            )}
+
+            {/* 内容 (Markdown) — 仅 text 类型显示 */}
+            {form.contentType === 'text' && (
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">正文内容（Markdown）</label>
+                <textarea
+                  value={form.contentText ?? ''}
+                  onChange={e => setForm(f => ({ ...f, contentText: e.target.value }))}
+                  rows={10}
+                  placeholder="支持 Markdown 格式：**粗体**、# 标题、- 列表、> 引用……"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-300 font-mono leading-relaxed resize-y"
+                />
+              </div>
+            )}
 
             {/* 发布状态 + 保存 */}
             <div className="flex items-center justify-between pt-1">
@@ -258,6 +307,18 @@ export function MaterialsManager({ initialMaterials }: { initialMaterials: Mater
                     <div className="flex items-center gap-2 flex-wrap text-xs text-gray-400">
                       <span className={`px-2 py-0.5 rounded-full font-medium ${zone.color}`}>{zone.label}</span>
                       {m.subject && <span className="bg-gray-100 px-2 py-0.5 rounded-full">{m.subject}</span>}
+                      {m.contentType === 'external_link' && (
+                        <span className="bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full">🔗 外链</span>
+                      )}
+                      {m.contentType === 'pdf' && (
+                        <span className="bg-orange-50 text-orange-500 px-2 py-0.5 rounded-full">📄 PDF</span>
+                      )}
+                      {m.contentUrl && (
+                        <a href={m.contentUrl} target="_blank" rel="noopener noreferrer"
+                          className="text-indigo-400 hover:text-indigo-600 underline truncate max-w-[200px]"
+                          title={m.contentUrl}
+                        >{m.contentUrl}</a>
+                      )}
                       {minMin && <span>约 {minMin} 分钟</span>}
                       {m._count && <span>{m._count.progress} 人已读</span>}
                     </div>
