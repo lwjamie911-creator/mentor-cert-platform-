@@ -143,10 +143,16 @@ export default async function MentorPage() {
                   <p className="text-3xl font-bold text-amber-600">{mentorCert.score} <span className="text-base font-normal text-gray-400">分</span></p>
                   <p className="text-xs text-gray-400 mt-1">证书有效期至 {dayjs(mentorCert.expiresAt).format('YYYY年MM月DD日')}</p>
                 </div>
-                <Link href="/mentor/certificate"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-amber-700 border-2 border-amber-300 hover:bg-amber-50 transition-colors">
-                  🏆 查看认证证书
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Link href="/mentor/certificate"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-amber-700 border-2 border-amber-300 hover:bg-amber-50 transition-colors">
+                    🏆 查看认证证书
+                  </Link>
+                  <Link href="/mentor/exam"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-600 border-2 border-gray-200 hover:border-amber-300 hover:text-amber-700 transition-colors">
+                    🔄 重新测试
+                  </Link>
+                </div>
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
