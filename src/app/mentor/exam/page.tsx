@@ -13,10 +13,6 @@ export default async function MentorExamPage() {
     redirect('/mentor')
   }
 
-  // 已有证书直接跳回
-  const cert = await prisma.mentorCertificate.findUnique({ where: { userId: session!.user.id } })
-  if (cert) redirect('/mentor')
-
   // 从导师题库随机抽题：必抽连线题1道 + 其余随机抽取
   const allQuestions = await prisma.question.findMany({
     where: { zone: 'mentor' },

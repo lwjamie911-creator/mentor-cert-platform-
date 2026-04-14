@@ -54,6 +54,11 @@ export function MentorExamClient({ questions }: { questions: Question[] }) {
     setSubmitting(false)
   }
 
+  function handleRetake() {
+    setAnswers({})
+    setResult(null)
+  }
+
   const answeredCount = questions.filter(q => isAnswered(q)).length
 
   // ── 结果页 ──
@@ -82,22 +87,25 @@ export function MentorExamClient({ questions }: { questions: Question[] }) {
         {passed && (
           <p className="text-gray-500 text-sm mb-6">恭喜！导师认证证书已颁发，快去查看吧 🎓</p>
         )}
+        {!passed && (
+          <p className="text-gray-500 text-sm mb-6">需要 80 分才能通过，再试一次吧！</p>
+        )}
 
-        <div className="flex gap-3 justify-center">
-          {passed ? (
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          {passed && (
             <Link href="/mentor/certificate"
-              className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white shadow-sm"
+              className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white shadow-sm"
               style={{ background: 'linear-gradient(90deg, #f59e0b, #fb923c)' }}
             >
               查看导师认证证书 →
             </Link>
-          ) : (
-            <Link href="/mentor"
-              className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold bg-white border-2 border-gray-200 text-gray-700 hover:border-amber-300 hover:text-amber-700 transition-colors"
-            >
-              ← 返回重试
-            </Link>
           )}
+          <button
+            onClick={handleRetake}
+            className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold bg-white border-2 border-gray-200 text-gray-700 hover:border-amber-300 hover:text-amber-700 transition-colors"
+          >
+            🔄 重新测试
+          </button>
         </div>
       </div>
     )
