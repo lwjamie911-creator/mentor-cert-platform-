@@ -7,14 +7,14 @@ export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { wxId } = await req.json()
-  if (!wxId) return NextResponse.json({ error: '请输入企业微信ID' }, { status: 400 })
+  const { email } = await req.json()
+  if (!email) return NextResponse.json({ error: '请输入企业微信邮箱' }, { status: 400 })
 
-  // 通过邮箱前缀找到用户
-  const newbie = await prisma.user.findFirst({
-    where: { email: { startsWith: `${wxId}@` } },
+  // 通过完整邮箱精确查找用户
+  const newbie = await prisma.user.findUnique({
+    where: { email: email.trim().toLowerCase() },
   })
-  if (!newbie) return NextResponse.json({ error: `找不到企业微信ID为 "${wxId}" 的用户` }, { status: 404 })
+  if (!newbie) return NextResponse.json({ error: `找不到邮箱为 "${email}" 的用户` }, { status: 404 })
   if (newbie.id === session.user.id) return NextResponse.json({ error: '不能添加自己' }, { status: 400 })
 
   // 检查是否已被其他导师绑定

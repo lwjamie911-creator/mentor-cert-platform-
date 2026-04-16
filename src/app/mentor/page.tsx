@@ -12,7 +12,7 @@ import dayjs from 'dayjs'
 export default async function MentorPage() {
   const session = await getServerSession(authOptions)!
 
-  const [selfCheck, mentorCert, pairs, materials, learningProgress] = await Promise.all([
+  const [selfCheck, mentorCert, pairs, materials, learningProgress, newbieMaterials] = await Promise.all([
     prisma.mentorSelfCheck.findUnique({ where: { userId: session!.user.id } }),
     prisma.mentorCertificate.findUnique({ where: { userId: session!.user.id } }),
     prisma.mentorNewbiePair.findMany({
@@ -33,6 +33,12 @@ export default async function MentorPage() {
       orderBy: [{ orderIndex: 'asc' }],
     }),
     prisma.learningProgress.findMany({ where: { userId: session!.user.id } }),
+    // 新人必修课程（用于计算新人学习进度）
+    prisma.learningMaterial.findMany({
+      where: { isPublished: true, zone: { in: ['newbie', 'both'] } },
+      select: { id: true, title: true, orderIndex: true },
+      orderBy: [{ orderIndex: 'asc' }],
+    }),
   ])
 
   const selfCheckDone = selfCheck?.check1 && selfCheck?.check2 && selfCheck?.check3 && selfCheck?.check4
@@ -46,6 +52,22 @@ export default async function MentorPage() {
     if (!cl) return acc
     return acc + (['A', 'B', 'C'] as const).filter(k => cl[`check${k}_self`] && !cl[`check${k}_mentor`]).length
   }, 0)
+
+  // 查询所有名下新人的学习进度
+  const newbieIds = pairs.map(p => p.newbie.id)
+  const newbieMaterialIds = new Set(newbieMaterials.map(m => m.id))
+  const allNewbieProgress = newbieIds.length > 0
+    ? await prisma.learningProgress.findMany({
+        where: { userId: { in: newbieIds }, materialId: { in: Array.from(newbieMaterialIds) } },
+        select: { userId: true, materialId: true },
+      })
+    : []
+  // 按新人 id 归组
+  const newbieProgressMap = new Map<string, Set<string>>()
+  for (const p of allNewbieProgress) {
+    if (!newbieProgressMap.has(p.userId)) newbieProgressMap.set(p.userId, new Set())
+    newbieProgressMap.get(p.userId)!.add(p.materialId)
+  }
 
   // 进度：自检 → 学习 → 认证
   const certProgress = [selfCheckDone, allMaterialsDone && selfCheckDone, !!mentorCert].filter(Boolean).length
@@ -174,43 +196,37 @@ export default async function MentorPage() {
       {/* ═══════════════════════════════════════════ */}
       {/* 第二块：新人学习跟踪及任务验收               */}
       {/* ═══════════════════════════════════════════ */}
-      <div className="relative">
-        {/* 建设中遮罩 */}
-        <div className="absolute inset-0 rounded-2xl z-10 pointer-events-none"
-          style={{ background: 'rgba(249,250,251,0.55)', backdropFilter: 'blur(1px)' }} />
-
-        <div className="relative">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-1 h-6 rounded-full bg-gray-300" />
-            <h2 className="text-base font-bold text-gray-400">新人学习跟踪及任务验收</h2>
-            <div className="flex items-center gap-1.5 ml-auto bg-gray-100 text-gray-400 text-xs font-medium px-3 py-1 rounded-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-pulse" />
-              建设中，敬请期待
-            </div>
-          </div>
-
-          <StepCard
-            step={4}
-            title="我的新人"
-            done={false}
-            locked={!mentorCert}
-            lockedHint="请先完成认证，加入导师池后解锁"
-            accentColor="blue"
-          >
-            <MentorNewbieList
-              mentorId={session!.user.id}
-              pairs={pairs.map(p => ({
-                id: p.id,
-                newbieId: p.newbie.id,
-                newbieName: p.newbie.name,
-                newbieEmail: p.newbie.email,
-                checklist: p.newbie.newbieChecklist,
-                exam: p.newbie.newbieExam,
-                badge: p.newbie.newbieBadge,
-              }))}
-            />
-          </StepCard>
+      <div>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-1 h-6 rounded-full bg-blue-400" />
+          <h2 className="text-base font-bold text-gray-900">新人学习跟踪及任务验收</h2>
         </div>
+
+        <StepCard
+          step={4}
+          title="我的新人"
+          done={false}
+          locked={!mentorCert}
+          lockedHint="请先完成认证，加入导师池后解锁"
+          accentColor="blue"
+        >
+          <MentorNewbieList
+            mentorId={session!.user.id}
+            pairs={pairs.map(p => ({
+              id: p.id,
+              newbieId: p.newbie.id,
+              newbieName: p.newbie.name,
+              newbieEmail: p.newbie.email,
+              checklist: p.newbie.newbieChecklist,
+              exam: p.newbie.newbieExam,
+              badge: p.newbie.newbieBadge,
+              learningProgress: {
+                completed: newbieProgressMap.get(p.newbie.id)?.size ?? 0,
+                total: newbieMaterialIds.size,
+              },
+            }))}
+          />
+        </StepCard>
       </div>
 
     </div>
