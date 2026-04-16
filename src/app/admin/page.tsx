@@ -3,10 +3,27 @@ import Link from 'next/link'
 import { BackupButton } from './backup-button'
 
 export default async function AdminDashboard() {
-  const [mentorCertCount, mentorSelfCheckCount] = await Promise.all([
+  const [mentorCertCount, mentorSelfCheckCount, newbieBadgeCount, allMaterials, allProgress] = await Promise.all([
     prisma.mentorCertificate.count(),
     prisma.mentorSelfCheck.count(),
+    prisma.newbieBadge.count(),
+    prisma.learningMaterial.findMany({
+      where: { isPublished: true, zone: { in: ['newbie', 'both'] } },
+      select: { id: true },
+    }),
+    prisma.learningProgress.findMany({ select: { userId: true, materialId: true } }),
   ])
+
+  // 计算完成全部新人课程的人数
+  const materialIds = new Set(allMaterials.map(m => m.id))
+  const userProgressMap = new Map<string, Set<string>>()
+  for (const p of allProgress) {
+    if (!materialIds.has(p.materialId)) continue
+    if (!userProgressMap.has(p.userId)) userProgressMap.set(p.userId, new Set())
+    userProgressMap.get(p.userId)!.add(p.materialId)
+  }
+  const newbieCompletedCount = materialIds.size === 0 ? 0 :
+    Array.from(userProgressMap.values()).filter(s => s.size >= materialIds.size).length
 
   return (
     <div className="space-y-8">
@@ -46,16 +63,26 @@ export default async function AdminDashboard() {
           </div>
         </section>
 
-        {/* 新人专区 — 建设中 */}
-        <section className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm opacity-50">
+        {/* 新人专区 */}
+        <section className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
           <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-50"
-            style={{ background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)' }}>
-            <span className="text-lg grayscale">🌱</span>
-            <h2 className="font-bold text-gray-500">新人专区</h2>
-            <span className="ml-auto text-xs bg-gray-100 text-gray-400 px-2.5 py-0.5 rounded-full font-medium">建设中</span>
+            style={{ background: 'linear-gradient(135deg, #eff6ff, #dbeafe)' }}>
+            <span className="text-lg">🌱</span>
+            <h2 className="font-bold text-blue-800">新人专区</h2>
           </div>
-          <div className="p-5 flex items-center justify-center h-24 text-gray-400">
-            <span className="text-sm">功能建设中，敬请期待</span>
+          <div className="p-5 grid grid-cols-2 gap-3">
+            <MiniStatCard
+              label="完成必修课程人数"
+              value={newbieCompletedCount}
+              href="/admin/users"
+              color="blue"
+            />
+            <MiniStatCard
+              label="结业证书颁发数"
+              value={newbieBadgeCount}
+              href="/admin/certificates"
+              color="blue"
+            />
           </div>
         </section>
       </div>
