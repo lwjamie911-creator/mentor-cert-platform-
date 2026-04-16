@@ -86,7 +86,7 @@ export function MentorNewbieList({ mentorId, pairs }: { mentorId: string; pairs:
               <input
                 value={email}
                 onChange={e => { setEmail(e.target.value); setError('') }}
-                placeholder="例：newbie_li@your-company.com"
+                placeholder="例：jamielv@tencent.com"
                 type="email"
                 className="flex-1 px-4 py-2.5 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 bg-white placeholder:text-gray-300 transition-all"
                 onKeyDown={e => e.key === 'Enter' && addNewbie()}
