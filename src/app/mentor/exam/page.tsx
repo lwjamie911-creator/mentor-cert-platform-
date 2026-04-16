@@ -20,14 +20,16 @@ export default async function MentorExamPage() {
   })
 
   const matchingQs = allQuestions.filter(q => q.type === 'matching')
-  const otherQs    = allQuestions.filter(q => q.type !== 'matching')
+  const multipleQs = allQuestions.filter(q => q.type === 'multiple')
+  const otherQs    = allQuestions.filter(q => q.type === 'single' || q.type === 'truefalse')
 
-  // 打乱其余题目，取4道；加上1道连线题，共5道
-  const shuffledOthers = otherQs.sort(() => Math.random() - 0.5).slice(0, 4)
+  // 必抽1道连线题 + 1道多选题 + 8道单选/判断题，共10道
   const pickedMatching = matchingQs.sort(() => Math.random() - 0.5).slice(0, 1)
+  const pickedMultiple = multipleQs.sort(() => Math.random() - 0.5).slice(0, 1)
+  const pickedOthers   = otherQs.sort(() => Math.random() - 0.5).slice(0, 8)
 
-  // 再整体打乱顺序，让连线题位置随机
-  const questions = [...shuffledOthers, ...pickedMatching].sort(() => Math.random() - 0.5)
+  // 整体打乱顺序
+  const questions = [...pickedMatching, ...pickedMultiple, ...pickedOthers].sort(() => Math.random() - 0.5)
 
   return <MentorExamClient questions={questions} />
 }

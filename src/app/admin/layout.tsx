@@ -8,6 +8,7 @@ const navItems = [
   { href: '/admin',              label: '数据看板', icon: '📊' },
   { href: '/admin/users',        label: '用户管理', icon: '👥' },
   { href: '/admin/courses',      label: '课程管理', icon: '📚' },
+  { href: '/admin/questions',    label: '题库管理', icon: '📝' },
   { href: '/admin/certificates', label: '证书管理', icon: '🏆' },
 ]
 

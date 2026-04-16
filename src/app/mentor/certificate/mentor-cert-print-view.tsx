@@ -38,11 +38,44 @@ export function MentorCertPrintView({ name, certificateNo, score, issuedDate, ex
           font-family: 'Noto Serif SC', 'SimSun', 'STSong', serif !important;
         }
         @media print {
-          .no-print { display: none !important; }
-          .cert-screen-wrap { padding: 0 !important; background: none !important; }
+          /* 隐藏页面所有非证书元素（导航栏、工具栏等） */
+          header, footer, nav, .no-print { display: none !important; }
+
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            overflow: hidden !important;
+          }
+
+          /* 强制打印背景色和背景图形 */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          /* 让外层容器消失，证书直接铺满打印页 */
+          .cert-screen-wrap {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 297mm !important;
+            height: 210mm !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: none !important;
+          }
+
+          .cert-scale-wrap {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            transform: none !important;
+            width: 297mm !important;
+            height: 210mm !important;
+          }
+
           .cert-shadow { box-shadow: none !important; }
-          .cert-scale-wrap { transform: none !important; width: 297mm !important; height: 210mm !important; }
-          body { background: white !important; }
         }
         @page { size: A4 landscape; margin: 0; }
       `}</style>

@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
   const total = questions.length
   const score = total > 0 ? Math.round((correctCount / total) * 100) : 0
-  const passed = score >= 60
+  const passed = score >= 80
 
   // 保存考试结果（允许重考，覆盖旧记录）
   await prisma.newbieExam.upsert({

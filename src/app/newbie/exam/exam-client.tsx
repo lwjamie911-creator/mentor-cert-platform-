@@ -2,31 +2,47 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { MatchingQuestion } from '@/components/matching-question'
 
 interface Question {
   id: string
   type: string
   content: string
   options: string
+  answer: string
 }
 
 const SUBJECTIVE_QUESTION = '请结合你在入职前三个月的实际经历，谈谈你对"导师制"的理解，以及导师对你成长的影响。（开放作答，不计入分数）'
 
 export function NewbieExamClient({ questions }: { questions: Question[] }) {
-  const [answers, setAnswers] = useState<Record<string, string | string[]>>({})
+  const [answers, setAnswers] = useState<Record<string, string | string[] | Record<number, number>>>({})
   const [subjectiveAnswer, setSubjectiveAnswer] = useState('')
   const [result, setResult] = useState<any>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  function handleAnswer(qId: string, opt: string, type: string) {
+  function handleAnswer(qId: string, val: string | string[] | Record<number, number>, type: string) {
     if (type === 'multiple') {
       setAnswers(prev => {
         const cur = (prev[qId] as string[]) || []
+        const opt = val as string
         return { ...prev, [qId]: cur.includes(opt) ? cur.filter(o => o !== opt) : [...cur, opt] }
       })
+    } else if (type === 'matching') {
+      setAnswers(prev => ({ ...prev, [qId]: val as Record<number, number> }))
     } else {
-      setAnswers(prev => ({ ...prev, [qId]: opt }))
+      setAnswers(prev => ({ ...prev, [qId]: val as string }))
     }
+  }
+
+  function isAnswered(q: Question): boolean {
+    const ans = answers[q.id]
+    if (q.type === 'multiple') return Array.isArray(ans) && ans.length > 0
+    if (q.type === 'matching') {
+      if (!ans || typeof ans !== 'object' || Array.isArray(ans)) return false
+      const opts: string[] = JSON.parse(q.options)
+      return Object.keys(ans).length === opts.length
+    }
+    return ans !== undefined
   }
 
   async function handleSubmit() {
@@ -45,7 +61,7 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
     setSubmitting(false)
   }
 
-  const objectiveAnswered = Object.keys(answers).length
+  const answeredCount = questions.filter(isAnswered).length
 
   // 结果页
   if (result) {
@@ -55,7 +71,7 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
         <div className={`rounded-3xl p-10 mb-6 relative overflow-hidden ${passed
           ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200'
           : 'bg-gradient-to-br from-gray-50 to-slate-100 border border-gray-200'}`}>
-          <div className="absolute top-[-20px] right-[-20px] text-8xl opacity-10">{passed ? '🏅' : '📝'}</div>
+          <div className="absolute top-[-20px] right-[-20px] text-8xl opacity-10">{passed ? '🎓' : '📝'}</div>
           <div className="text-6xl mb-4">{passed ? '🎉' : '😅'}</div>
           <div className={`text-7xl font-black mb-2 ${passed ? 'text-blue-500' : 'text-gray-400'}`}>
             {result.score}
@@ -66,21 +82,21 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
           </div>
           <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold mt-2
             ${passed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
-            {passed ? '✓ 通过' : '✗ 未通过（需 60 分）'}
+            {passed ? '✓ 通过' : '✗ 未通过（需 80 分）'}
           </div>
         </div>
 
         {passed && (
-          <p className="text-gray-500 text-sm mb-6">恭喜！成长勋章已颁发，记录你的精彩时刻 🌱</p>
+          <p className="text-gray-500 text-sm mb-6">恭喜！完成证书已颁发，记录你的成长里程碑 🌱</p>
         )}
 
         <div className="flex gap-3 justify-center">
           {passed ? (
-            <Link href="/newbie/badge"
+            <Link href="/newbie/certificate"
               className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white shadow-sm"
               style={{ background: 'linear-gradient(90deg, #3b82f6, #6366f1)' }}
             >
-              查看成长勋章 →
+              🎓 查看完成证书 →
             </Link>
           ) : (
             <Link href="/newbie"
@@ -101,10 +117,10 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
         <div className="flex items-center justify-between mb-2">
           <div>
             <h1 className="text-xl font-bold text-gray-900">新人知识测试</h1>
-            <p className="text-sm text-gray-400 mt-0.5">{questions.length} 道客观题 + 1 道主观题 · 客观 60 分及以上通过</p>
+            <p className="text-sm text-gray-400 mt-0.5">{questions.length} 道客观题 + 1 道主观题 · 客观 80 分及以上通过</p>
           </div>
           <div className="text-right">
-            <span className="text-2xl font-black text-blue-500">{objectiveAnswered}</span>
+            <span className="text-2xl font-black text-blue-500">{answeredCount}</span>
             <span className="text-gray-400 text-sm">/{questions.length}</span>
             <p className="text-xs text-gray-400">已作答</p>
           </div>
@@ -112,7 +128,7 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
         <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
           <div className="h-full rounded-full transition-all duration-500"
             style={{
-              width: `${(objectiveAnswered / questions.length) * 100}%`,
+              width: `${(answeredCount / questions.length) * 100}%`,
               background: 'linear-gradient(90deg, #3b82f6, #6366f1)',
             }} />
         </div>
@@ -121,18 +137,54 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
       {/* 客观题 */}
       <div className="space-y-4 mb-4">
         {questions.map((q, i) => {
+          const answered = isAnswered(q)
+
+          if (q.type === 'matching') {
+            const leftItems: string[] = JSON.parse(q.options)
+            const rightItems: string[] = JSON.parse(q.answer)
+            const val = (answers[q.id] as Record<number, number>) || {}
+            const connectedCount = Object.keys(val).length
+
+            return (
+              <div key={q.id} className={`bg-white rounded-2xl border-2 p-5 transition-all duration-200
+                ${answered ? 'border-blue-200' : 'border-gray-100 hover:border-gray-200'}`}>
+                <div className="flex items-start gap-3 mb-2">
+                  <span className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
+                    ${answered ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                    {answered ? '✓' : i + 1}
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900 leading-relaxed">{q.content}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">连线题</span>
+                      <span className="text-xs text-gray-400">{connectedCount}/{leftItems.length} 已连线</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="pl-10">
+                  <MatchingQuestion
+                    questionId={q.id}
+                    leftItems={leftItems}
+                    rightItems={rightItems}
+                    value={val}
+                    onChange={(newVal) => handleAnswer(q.id, newVal, 'matching')}
+                  />
+                </div>
+              </div>
+            )
+          }
+
           const options: string[] = JSON.parse(q.options)
           const selected = answers[q.id]
-          const isAnswered = selected !== undefined && (Array.isArray(selected) ? selected.length > 0 : true)
           const typeLabel = q.type === 'multiple' ? '多选' : q.type === 'truefalse' ? '判断' : '单选'
 
           return (
             <div key={q.id} className={`bg-white rounded-2xl border-2 p-5 transition-all duration-200
-              ${isAnswered ? 'border-blue-200' : 'border-gray-100 hover:border-gray-200'}`}>
+              ${answered ? 'border-blue-200' : 'border-gray-100 hover:border-gray-200'}`}>
               <div className="flex items-start gap-3 mb-4">
                 <span className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
-                  ${isAnswered ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
-                  {isAnswered ? '✓' : i + 1}
+                  ${answered ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                  {answered ? '✓' : i + 1}
                 </span>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900 leading-relaxed">{q.content}</p>
@@ -199,16 +251,16 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
       <div className="sticky bottom-4">
         <button
           onClick={handleSubmit}
-          disabled={submitting || objectiveAnswered < questions.length}
+          disabled={submitting || answeredCount < questions.length}
           className="w-full py-3.5 rounded-2xl font-bold text-sm text-white shadow-lg transition-all"
           style={{
-            background: objectiveAnswered < questions.length || submitting
+            background: answeredCount < questions.length || submitting
               ? '#d1d5db'
               : 'linear-gradient(90deg, #3b82f6, #6366f1)',
           }}
         >
-          {submitting ? '提交中...' : objectiveAnswered < questions.length
-            ? `还有 ${questions.length - objectiveAnswered} 道客观题未作答`
+          {submitting ? '提交中...' : answeredCount < questions.length
+            ? `还有 ${questions.length - answeredCount} 道客观题未作答`
             : '提交答案 →'}
         </button>
       </div>

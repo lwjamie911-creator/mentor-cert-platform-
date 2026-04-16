@@ -3,16 +3,13 @@ export const dynamic = 'force-dynamic'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { NewbieBindMentor } from './bind-mentor'
-import { NewbieChecklistPanel } from './checklist-panel'
-import { LearningTaskPanel } from '@/components/learning-task-panel'
+import { NewbieCoursesPanel } from './courses-panel'
 import Link from 'next/link'
 
 export default async function NewbiePage() {
   const session = await getServerSession(authOptions)!
 
-  const [checklist, exam, badge, materials, learningProgress] = await Promise.all([
-    prisma.newbieChecklist.findUnique({ where: { userId: session!.user.id } }),
+  const [exam, badge, materials, learningProgress] = await Promise.all([
     prisma.newbieExam.findUnique({ where: { userId: session!.user.id } }),
     prisma.newbieBadge.findUnique({ where: { userId: session!.user.id } }),
     prisma.learningMaterial.findMany({
@@ -22,13 +19,12 @@ export default async function NewbiePage() {
     prisma.learningProgress.findMany({ where: { userId: session!.user.id } }),
   ])
 
-  const allChecksDone = !!(checklist?.allDoneAt)
   const completedIds = new Set(learningProgress.map(p => p.materialId))
   const materialsWithProgress = materials.map(m => ({ ...m, completed: completedIds.has(m.id) }))
   const allMaterialsDone = materials.length === 0 || materialsWithProgress.every(m => m.completed)
 
-  // 进度：4步
-  const progress = [!!checklist, allChecksDone, allMaterialsDone && allChecksDone, !!exam?.passed].filter(Boolean).length
+  // 进度：2步
+  const progress = [allMaterialsDone, !!exam?.passed].filter(Boolean).length
 
   return (
     <div className="space-y-5">
@@ -44,92 +40,58 @@ export default async function NewbiePage() {
           <div className="flex items-center gap-2 mb-1">
             <div className="flex-1 h-2 bg-white/30 rounded-full overflow-hidden">
               <div className="h-full bg-white rounded-full transition-all duration-700"
-                style={{ width: `${(progress / 4) * 100}%` }} />
+                style={{ width: `${(progress / 2) * 100}%` }} />
             </div>
-            <span className="text-white/80 text-xs font-mono">{progress}/4</span>
+            <span className="text-white/80 text-xs font-mono">{progress}/2</span>
           </div>
           <p className="text-blue-100 text-xs">
-            {progress === 0 && '先绑定你的导师，开启成长之旅'}
-            {progress === 1 && '导师已绑定！完成 ABC 三项成长指标'}
-            {progress === 2 && '指标达成！去学习新人知识资料'}
-            {progress === 3 && '资料学完！参加知识测试获得勋章'}
-            {progress === 4 && '全部完成，你已获得成长勋章 🏅'}
+            {progress === 0 && '先完成必修课堂，再参加知识测试'}
+            {progress === 1 && '课程已学完！参加知识测试获得成长证书'}
+            {progress === 2 && '全部完成，你已获得新人成长课程结业证书 🎓'}
           </p>
         </div>
       </div>
 
-      {/* 勋章横幅 */}
+      {/* 证书横幅 */}
       {badge && (
         <div className="rounded-2xl p-5 relative overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)' }}>
-          <div className="absolute top-0 right-0 text-8xl opacity-10 leading-none">🏅</div>
+          style={{ background: 'linear-gradient(135deg, #0ea5e9 0%, #0d9488 100%)' }}>
+          <div className="absolute top-0 right-0 text-8xl opacity-10 leading-none">🎓</div>
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="text-4xl">🏅</div>
+            <div className="text-4xl">🎓</div>
             <div className="flex-1 text-white">
-              <h2 className="text-lg font-bold mb-0.5">恭喜完成所有考核！</h2>
-              <p className="text-indigo-200 text-sm">你已获得 3 个月培养达标勋章，为自己鼓个掌吧 👏</p>
+              <h2 className="text-lg font-bold mb-0.5">恭喜完成必修学习和测试！</h2>
+              <p className="text-sky-100 text-sm">你已获得新人成长课程结业证书，记录你的成长里程碑 🌱</p>
             </div>
-            <Link href="/newbie/badge"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-indigo-600 rounded-xl text-sm font-semibold hover:bg-indigo-50 transition-colors flex-shrink-0"
-            >
-              查看 / 下载勋章 →
-            </Link>
+            <div className="flex gap-2 flex-shrink-0">
+              <Link href="/newbie/certificate"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-sky-600 rounded-xl text-sm font-semibold hover:bg-sky-50 transition-colors"
+              >
+                🎓 查看结业证书 →
+              </Link>
+            </div>
           </div>
         </div>
       )}
 
-      {/* 步骤一：绑定导师 */}
+      {/* 步骤一：必修课堂 */}
       <StepCard
         step={1}
-        title="绑定我的导师"
-        done={!!checklist}
+        title="新人必修课堂"
+        done={allMaterialsDone}
         locked={false}
-        doneHint={checklist ? `已绑定 ${checklist.mentorWxId}` : undefined}
+        badge={materials.length > 0 ? `${materialsWithProgress.filter(m => m.completed).length}/${materials.length} 门` : undefined}
       >
-        {!checklist ? (
-          <NewbieBindMentor userId={session!.user.id} />
-        ) : (
-          <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
-            <span className="text-2xl">🎓</span>
-            <div>
-              <p className="text-xs text-gray-400">你的导师</p>
-              <p className="font-semibold text-gray-800 font-mono">{checklist.mentorWxId}</p>
-            </div>
-          </div>
-        )}
+        <NewbieCoursesPanel userId={session!.user.id} initialMaterials={materialsWithProgress} />
       </StepCard>
 
-      {/* 步骤二：ABC 成长指标 */}
+      {/* 步骤二：知识测试与成长证书 */}
       <StepCard
         step={2}
-        title="ABC 成长指标"
-        done={allChecksDone}
-        locked={!checklist}
-        lockedHint="请先绑定导师"
-        doneHint={allChecksDone ? '全部达成' : undefined}
-      >
-        {checklist && <NewbieChecklistPanel userId={session!.user.id} checklist={checklist} />}
-      </StepCard>
-
-      {/* 步骤三：学习资料 */}
-      <StepCard
-        step={3}
-        title="学习资料"
-        done={allMaterialsDone && allChecksDone}
-        locked={!allChecksDone}
-        lockedHint="请先完成成长指标"
-        badge={materials.length > 0 ? `${materialsWithProgress.filter(m => m.completed).length}/${materials.length} 篇` : undefined}
-      >
-        <LearningTaskPanel zone="newbie" initialMaterials={materialsWithProgress} />
-      </StepCard>
-
-      {/* 步骤四：知识测试 */}
-      <StepCard
-        step={4}
-        title="知识测试"
+        title="知识测试与成长证书"
         done={!!exam?.passed}
-        locked={!allChecksDone || !allMaterialsDone}
-        lockedHint={!allChecksDone ? '请先完成成长指标' : '请先完成所有学习资料'}
+        locked={!allMaterialsDone}
+        lockedHint="请先完成所有课程"
         doneHint={exam?.passed ? `${exam.score} 分通过` : undefined}
       >
         {exam ? (
@@ -148,19 +110,26 @@ export default async function NewbiePage() {
               </Link>
             )}
             {exam.passed && (
-              <Link href="/newbie/badge"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-                style={{ background: 'linear-gradient(90deg, #4f46e5, #7c3aed)' }}
-              >
-                🏅 查看勋章
-              </Link>
+              <div className="flex gap-2">
+                <Link href="/newbie/certificate"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
+                  style={{ background: 'linear-gradient(90deg, #0ea5e9, #0d9488)' }}
+                >
+                  🎓 查看结业证书
+                </Link>
+                <Link href="/newbie/exam"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-500 border border-gray-200 hover:border-blue-200 hover:text-blue-600 transition-colors"
+                >
+                  重考
+                </Link>
+              </div>
             )}
           </div>
         ) : (
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1">
               <p className="text-sm text-gray-500">从题库随机抽取题目，含连线题</p>
-              <p className="text-xs text-gray-400 mt-0.5">60 分及以上视为通过，即可获得成长勋章</p>
+              <p className="text-xs text-gray-400 mt-0.5">80 分及以上视为通过，即可获得新人成长课程结业证书</p>
             </div>
             <Link href="/newbie/exam"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"

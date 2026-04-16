@@ -95,30 +95,38 @@ export default async function ZonePage() {
         {/* 双专区卡片 */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
 
-          {/* 新人专区 — 建设中 */}
-          <div className="relative overflow-hidden rounded-3xl p-8 cursor-not-allowed select-none"
-            style={{ background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)', border: '1.5px solid #e5e7eb' }}>
-            {/* 装饰 */}
-            <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-[0.06]"
-              style={{ background: 'radial-gradient(circle, #6b7280, transparent)', transform: 'translate(30%,-30%)' }} />
-            <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full opacity-[0.04]"
-              style={{ background: 'radial-gradient(circle, #9ca3af, transparent)', transform: 'translate(-30%,30%)' }} />
+          {/* 新人专区 */}
+          <Link href="/newbie" className="group">
+            <div className="relative overflow-hidden rounded-3xl p-8 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl cursor-pointer h-full"
+              style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 60%, #bfdbfe 100%)', border: '1.5px solid #93c5fd' }}>
+              {/* 装饰 */}
+              <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-20"
+                style={{ background: 'radial-gradient(circle, #3b82f6, transparent)', transform: 'translate(30%,-30%)' }} />
+              <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full opacity-10"
+                style={{ background: 'radial-gradient(circle, #6366f1, transparent)', transform: 'translate(-20%,20%)' }} />
+              {/* 右下角小菱形装饰 */}
+              <div className="absolute bottom-6 right-8 w-3 h-3 bg-blue-300 opacity-50 rotate-45" />
+              <div className="absolute bottom-10 right-14 w-1.5 h-1.5 bg-blue-400 opacity-40 rotate-45" />
 
-            {/* 建设中角标 */}
-            <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-gray-200/80 text-gray-500 text-xs font-medium px-3 py-1.5 rounded-full">
-              <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-pulse" />
-              即将上线
-            </div>
+              <div className="text-5xl mb-5 relative z-10">🌱</div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-3 relative z-10">新人专区</h2>
 
-            <div className="text-5xl mb-5 grayscale opacity-30">🌱</div>
-            <h2 className="text-2xl font-bold text-gray-300 mb-2">新人专区</h2>
-            <p className="text-sm text-gray-400 leading-relaxed mb-5">
-              该专区正在建设中，敬请期待
-            </p>
-            <div className="inline-flex items-center gap-1.5 text-xs text-gray-400 bg-gray-200/60 px-3 py-1.5 rounded-xl">
-              🚧 建设中，稍后上线
+              <div className="flex flex-col gap-2.5 mb-6 relative z-10">
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <span className="w-5 h-5 rounded-full bg-blue-200 flex items-center justify-center text-xs flex-shrink-0">✦</span>
+                  <span>解锁新人必修课，领取入门秘籍</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <span className="w-5 h-5 rounded-full bg-blue-200 flex items-center justify-center text-xs flex-shrink-0">✦</span>
+                  <span>完成自测挑战，自信开启第一步</span>
+                </div>
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 text-sm text-blue-700 font-semibold group-hover:gap-2.5 transition-all relative z-10">
+                进入新人专区 <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+              </div>
             </div>
-          </div>
+          </Link>
 
           {/* 导师专区 */}
           <Link href="/mentor" className="group">

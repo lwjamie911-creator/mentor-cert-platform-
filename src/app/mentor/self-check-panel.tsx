@@ -27,7 +27,7 @@ const CHECKS = [
     label: '绩效要求',
     icon: '📈',
     front: '绩效要求',
-    back: '往期绩效至少 1 次 Outstanding，且从未 Underperform',
+    back: '往期绩效至少 1 次 Outstanding',
     stamp: '达标',
     color: 'rose',
   },
