@@ -21,7 +21,6 @@ export default async function MentorPage() {
         newbie: {
           select: {
             id: true, name: true, email: true,
-            newbieChecklist: true,
             newbieExam: true,
             newbieBadge: true,
           },
@@ -47,11 +46,6 @@ export default async function MentorPage() {
   const allMaterialsDone = materials.length === 0 || materialsWithProgress.every(m => m.completed)
 
   const newbiesDone = pairs.filter(p => p.newbie.newbieBadge && p.newbie.newbieExam?.passed)
-  const pendingConfirmCount = pairs.reduce((acc, p) => {
-    const cl = p.newbie.newbieChecklist
-    if (!cl) return acc
-    return acc + (['A', 'B', 'C'] as const).filter(k => cl[`check${k}_self`] && !cl[`check${k}_mentor`]).length
-  }, 0)
 
   // 查询所有名下新人的学习进度
   const newbieIds = pairs.map(p => p.newbie.id)
@@ -217,7 +211,6 @@ export default async function MentorPage() {
               newbieId: p.newbie.id,
               newbieName: p.newbie.name,
               newbieEmail: p.newbie.email,
-              checklist: p.newbie.newbieChecklist,
               exam: p.newbie.newbieExam,
               badge: p.newbie.newbieBadge,
               learningProgress: {
