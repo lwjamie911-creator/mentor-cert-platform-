@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma'
 import { MentorSelfCheckPanel } from './self-check-panel'
 import { MentorNewbieList } from './newbie-list'
 import { MentorCoursesPanel } from './courses-panel'
+import { NewbieDoneAlert } from './newbie-done-alert'
 import Link from 'next/link'
 import dayjs from 'dayjs'
 
@@ -93,16 +94,10 @@ export default async function MentorPage() {
         </div>
       </div>
 
-      {/* 新人完成提醒 */}
-      {newbiesDone.length > 0 && (
-        <div className="rounded-xl border border-green-200 bg-green-50 px-5 py-4 flex items-start gap-3">
-          <span className="text-xl mt-0.5">🎉</span>
-          <div>
-            <p className="font-semibold text-green-800 text-sm">{newbiesDone.length} 位新人已完成全部考核！</p>
-            <p className="text-green-600 text-xs mt-0.5">{newbiesDone.map(p => p.newbie.name).join('、')} 已达标</p>
-          </div>
-        </div>
-      )}
+      {/* 新人完成提醒（仅提示一次，关闭后不再显示） */}
+      <NewbieDoneAlert
+        newbiesDone={newbiesDone.map(p => ({ pairId: p.id, name: p.newbie.name }))}
+      />
 
       {/* ═══════════════════════════════════════════ */}
       {/* 第一块：加入 TEG 秘书中心导师池              */}
