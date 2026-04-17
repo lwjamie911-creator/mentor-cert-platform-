@@ -5,7 +5,6 @@ import { PairsClient } from './pairs-client'
 
 export default async function AdminPairsPage() {
   const pairs = await prisma.mentorNewbiePair.findMany({
-    where: { isAdminPaired: true },
     include: {
       mentor: { select: { id: true, name: true, email: true } },
       newbie:  { select: { id: true, name: true, email: true } },
