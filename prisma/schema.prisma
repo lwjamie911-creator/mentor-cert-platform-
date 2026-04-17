@@ -174,10 +174,14 @@ model Certificate {
 // 导师-新人配对
 // ─────────────────────────────────────────────
 model MentorNewbiePair {
-  id        String   @id @default(cuid())
-  mentorId  String
-  newbieId  String   @unique
-  createdAt DateTime @default(now())
+  id             String    @id @default(cuid())
+  mentorId       String
+  newbieId       String    @unique
+  isAdminPaired  Boolean   @default(false)   // 管理员预配对标记
+  isConfirmed    Boolean   @default(false)   // 导师已确认并发送寄语
+  mentorMessage  String?                     // 导师寄语
+  confirmedAt    DateTime?                   // 导师确认时间
+  createdAt      DateTime  @default(now())
 
   mentor    User     @relation("MentorPairs", fields: [mentorId], references: [id], onDelete: Cascade)
   newbie    User     @relation("NewbiePairs", fields: [newbieId], references: [id], onDelete: Cascade)

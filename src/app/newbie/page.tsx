@@ -4,12 +4,13 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { NewbieCoursesPanel } from './courses-panel'
+import { MentorLetterBanner } from './mentor-letter-banner'
 import Link from 'next/link'
 
 export default async function NewbiePage() {
   const session = await getServerSession(authOptions)!
 
-  const [exam, badge, materials, learningProgress] = await Promise.all([
+  const [exam, badge, materials, learningProgress, mentorPair] = await Promise.all([
     prisma.newbieExam.findUnique({ where: { userId: session!.user.id } }),
     prisma.newbieBadge.findUnique({ where: { userId: session!.user.id } }),
     prisma.learningMaterial.findMany({
@@ -17,6 +18,10 @@ export default async function NewbiePage() {
       orderBy: [{ orderIndex: 'asc' }],
     }),
     prisma.learningProgress.findMany({ where: { userId: session!.user.id } }),
+    prisma.mentorNewbiePair.findUnique({
+      where: { newbieId: session!.user.id },
+      include: { mentor: { select: { name: true } } },
+    }),
   ])
 
   const completedIds = new Set(learningProgress.map(p => p.materialId))
@@ -28,6 +33,14 @@ export default async function NewbiePage() {
 
   return (
     <div className="space-y-5">
+
+      {/* 导师寄语 */}
+      {mentorPair?.isConfirmed && mentorPair.mentorMessage && (
+        <MentorLetterBanner
+          mentorName={mentorPair.mentor.name}
+          message={mentorPair.mentorMessage}
+        />
+      )}
 
       {/* Hero 区 */}
       <div className="rounded-2xl p-6 text-white relative overflow-hidden"

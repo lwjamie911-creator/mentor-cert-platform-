@@ -17,7 +17,7 @@ export default async function MentorPage() {
     prisma.mentorSelfCheck.findUnique({ where: { userId: session!.user.id } }),
     prisma.mentorCertificate.findUnique({ where: { userId: session!.user.id } }),
     prisma.mentorNewbiePair.findMany({
-      where: { mentorId: session!.user.id },
+      where: { mentorId: session!.user.id, isConfirmed: true },
       include: {
         newbie: {
           select: {

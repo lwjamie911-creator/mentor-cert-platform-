@@ -10,6 +10,7 @@ const navItems = [
   { href: '/admin/courses',      label: '课程管理', icon: '📚' },
   { href: '/admin/questions',    label: '题库管理', icon: '📝' },
   { href: '/admin/certificates', label: '证书管理', icon: '🏆' },
+  { href: '/admin/pairs',        label: '导师新人匹配', icon: '🤝' },
 ]
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
