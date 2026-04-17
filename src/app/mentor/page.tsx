@@ -7,13 +7,14 @@ import { MentorSelfCheckPanel } from './self-check-panel'
 import { MentorNewbieList } from './newbie-list'
 import { MentorCoursesPanel } from './courses-panel'
 import { NewbieDoneAlert } from './newbie-done-alert'
+import { MentorProfilePanel } from './mentor-profile-panel'
 import Link from 'next/link'
 import dayjs from 'dayjs'
 
 export default async function MentorPage() {
   const session = await getServerSession(authOptions)!
 
-  const [selfCheck, mentorCert, pairs, materials, learningProgress, newbieMaterials] = await Promise.all([
+  const [selfCheck, mentorCert, pairs, materials, learningProgress, newbieMaterials, mentorProfile] = await Promise.all([
     prisma.mentorSelfCheck.findUnique({ where: { userId: session!.user.id } }),
     prisma.mentorCertificate.findUnique({ where: { userId: session!.user.id } }),
     prisma.mentorNewbiePair.findMany({
@@ -39,6 +40,7 @@ export default async function MentorPage() {
       select: { id: true, title: true, orderIndex: true },
       orderBy: [{ orderIndex: 'asc' }],
     }),
+    prisma.mentorProfile.findUnique({ where: { userId: session!.user.id } }),
   ])
 
   const selfCheckDone = selfCheck?.check1 && selfCheck?.check2 && selfCheck?.check3 && selfCheck?.check4
@@ -181,6 +183,43 @@ export default async function MentorPage() {
           </StepCard>
         </div>
       </div>
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* 导师档案（认证后解锁）                      */}
+      {/* ═══════════════════════════════════════════ */}
+      {mentorCert && (
+        <div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-1 h-6 rounded-full bg-orange-400" />
+            <h2 className="text-base font-bold text-gray-900">我的导师档案</h2>
+          </div>
+
+          <section className="bg-white rounded-2xl border border-gray-200 ring-1 ring-orange-200 overflow-hidden">
+            <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-50">
+              <span className="w-7 h-7 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center text-base flex-shrink-0">
+                📋
+              </span>
+              <h2 className="font-semibold text-gray-900 flex-1">我的导师档案</h2>
+              {(mentorProfile?.yearsOfExperience || mentorProfile?.projectExperience || mentorProfile?.highlights || mentorProfile?.photoBase64) && (
+                <span className="text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full font-medium">✓ 已填写</span>
+              )}
+            </div>
+            <div className="px-6 py-5">
+              <p className="text-xs text-gray-400 mb-4 leading-relaxed">
+                给新人介绍一下你的职业年限、过往项目经验和高光成绩吧，帮助新人更好地认识自己的导师！
+              </p>
+              <MentorProfilePanel
+                initialProfile={mentorProfile ? {
+                  yearsOfExperience: mentorProfile.yearsOfExperience,
+                  projectExperience: mentorProfile.projectExperience,
+                  highlights: mentorProfile.highlights,
+                  photoBase64: mentorProfile.photoBase64,
+                } : null}
+              />
+            </div>
+          </section>
+        </div>
+      )}
 
       {/* ═══════════════════════════════════════════ */}
       {/* 第二块：新人学习跟踪及任务验收               */}

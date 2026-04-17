@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { NewbieCoursesPanel } from './courses-panel'
 import { MentorLetterBanner } from './mentor-letter-banner'
+import { MentorProfileViewer } from './mentor-profile-viewer'
 import Link from 'next/link'
 
 export default async function NewbiePage() {
@@ -20,7 +21,7 @@ export default async function NewbiePage() {
     prisma.learningProgress.findMany({ where: { userId: session!.user.id } }),
     prisma.mentorNewbiePair.findUnique({
       where: { newbieId: session!.user.id },
-      include: { mentor: { select: { name: true } } },
+      include: { mentor: { select: { id: true, name: true } } },
     }),
   ])
 
@@ -39,6 +40,14 @@ export default async function NewbiePage() {
         <MentorLetterBanner
           mentorName={mentorPair.mentor.name}
           message={mentorPair.mentorMessage}
+        />
+      )}
+
+      {/* 查看导师档案 */}
+      {mentorPair?.isConfirmed && (
+        <MentorProfileViewer
+          mentorId={mentorPair.mentor.id}
+          mentorName={mentorPair.mentor.name ?? '你的导师'}
         />
       )}
 
