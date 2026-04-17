@@ -205,9 +205,6 @@ export default async function MentorPage() {
               )}
             </div>
             <div className="px-6 py-5">
-              <p className="text-xs text-gray-400 mb-4 leading-relaxed">
-                给新人介绍一下你的职业年限、过往项目经验和高光成绩吧，帮助新人更好地认识自己的导师！
-              </p>
               <MentorProfilePanel
                 initialProfile={mentorProfile ? {
                   yearsOfExperience: mentorProfile.yearsOfExperience,
