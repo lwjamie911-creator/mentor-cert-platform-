@@ -16,10 +16,13 @@ export default function Icon() {
           justifyContent: 'center',
           background: 'linear-gradient(135deg, #f59e0b, #fb923c)',
           borderRadius: 8,
-          fontSize: 20,
+          color: '#ffffff',
+          fontSize: 18,
+          fontWeight: 800,
+          letterSpacing: '-1px',
         }}
       >
-        🎓
+        秘
       </div>
     ),
     { ...size }
