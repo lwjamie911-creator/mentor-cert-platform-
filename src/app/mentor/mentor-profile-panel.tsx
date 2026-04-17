@@ -19,23 +19,26 @@ export function MentorProfilePanel({ initialProfile }: Props) {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
 
+  // 将旧的两个字段合并展示：优先用 projectExperience，拼接 highlights
+  function mergeIntro(p: MentorProfileData | null) {
+    if (!p) return ''
+    const parts = [p.projectExperience, p.highlights].filter(Boolean)
+    return parts.join('\n\n')
+  }
+
   const [years, setYears] = useState(initialProfile?.yearsOfExperience ?? '')
-  const [projects, setProjects] = useState(initialProfile?.projectExperience ?? '')
-  const [highlights, setHighlights] = useState(initialProfile?.highlights ?? '')
+  const [intro, setIntro] = useState(mergeIntro(initialProfile))
   const [photo, setPhoto] = useState<string | null>(initialProfile?.photoBase64 ?? null)
 
-  // Local edit drafts
   const [draftYears, setDraftYears] = useState(years)
-  const [draftProjects, setDraftProjects] = useState(projects)
-  const [draftHighlights, setDraftHighlights] = useState(highlights)
+  const [draftIntro, setDraftIntro] = useState(intro)
   const [draftPhoto, setDraftPhoto] = useState<string | null>(photo)
 
   const fileRef = useRef<HTMLInputElement>(null)
 
   function startEdit() {
     setDraftYears(years)
-    setDraftProjects(projects)
-    setDraftHighlights(highlights)
+    setDraftIntro(intro)
     setDraftPhoto(photo)
     setError('')
     setSaved(false)
@@ -67,8 +70,8 @@ export function MentorProfilePanel({ initialProfile }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         yearsOfExperience: draftYears.trim() || null,
-        projectExperience: draftProjects.trim() || null,
-        highlights: draftHighlights.trim() || null,
+        projectExperience: draftIntro.trim() || null,
+        highlights: null,
         photoBase64: draftPhoto,
       }),
     })
@@ -79,14 +82,13 @@ export function MentorProfilePanel({ initialProfile }: Props) {
       return
     }
     setYears(draftYears.trim())
-    setProjects(draftProjects.trim())
-    setHighlights(draftHighlights.trim())
+    setIntro(draftIntro.trim())
     setPhoto(draftPhoto)
     setEditing(false)
     setSaved(true)
   }
 
-  const hasContent = years || projects || highlights || photo
+  const hasContent = years || intro || photo
 
   if (!editing) {
     return (
@@ -99,7 +101,6 @@ export function MentorProfilePanel({ initialProfile }: Props) {
 
         {hasContent ? (
           <div className="space-y-4">
-            {/* Photo + basic info */}
             <div className="flex items-start gap-4">
               {photo ? (
                 <img
@@ -122,17 +123,10 @@ export function MentorProfilePanel({ initialProfile }: Props) {
               </div>
             </div>
 
-            {projects && (
+            {intro && (
               <div className="bg-amber-50/60 rounded-xl px-4 py-3 border border-amber-100">
-                <p className="text-xs font-semibold text-amber-600 mb-1">📂 过往项目经验</p>
-                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{projects}</p>
-              </div>
-            )}
-
-            {highlights && (
-              <div className="bg-orange-50/60 rounded-xl px-4 py-3 border border-orange-100">
-                <p className="text-xs font-semibold text-orange-600 mb-1">🏆 高光成绩</p>
-                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{highlights}</p>
+                <p className="text-xs font-semibold text-amber-600 mb-1">📝 个人介绍</p>
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{intro}</p>
               </div>
             )}
 
@@ -213,7 +207,7 @@ export function MentorProfilePanel({ initialProfile }: Props) {
       {/* Years */}
       <div>
         <label className="block text-xs font-semibold text-gray-500 mb-1.5">
-          职业年限 <span className="font-normal text-gray-400">（如：5年，在 xx 领域工作 xx 年）</span>
+          职业年限 <span className="font-normal text-gray-400">（如：从事行政工作 6 年）</span>
         </label>
         <input
           value={draftYears}
@@ -223,30 +217,16 @@ export function MentorProfilePanel({ initialProfile }: Props) {
         />
       </div>
 
-      {/* Project experience */}
+      {/* Intro */}
       <div>
         <label className="block text-xs font-semibold text-gray-500 mb-1.5">
-          过往项目经验
+          个人介绍 <span className="font-normal text-gray-400">（过往经历、项目经验、高光成绩，随便写）</span>
         </label>
         <textarea
-          value={draftProjects}
-          onChange={e => setDraftProjects(e.target.value)}
-          rows={4}
-          placeholder="介绍你参与或主导过的项目，包括项目背景、你的角色和贡献……"
-          className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 placeholder:text-gray-300 transition-all resize-none leading-relaxed"
-        />
-      </div>
-
-      {/* Highlights */}
-      <div>
-        <label className="block text-xs font-semibold text-gray-500 mb-1.5">
-          高光成绩 <span className="font-normal text-gray-400">（奖项、荣誉、代表性成果）</span>
-        </label>
-        <textarea
-          value={draftHighlights}
-          onChange={e => setDraftHighlights(e.target.value)}
-          rows={3}
-          placeholder="例：年度优秀员工、主导 xx 项目获部门表彰、完成 xx 重大活动保障……"
+          value={draftIntro}
+          onChange={e => setDraftIntro(e.target.value)}
+          rows={6}
+          placeholder="介绍一下自己吧，比如参与过哪些项目、有什么值得骄傲的成绩……"
           className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 placeholder:text-gray-300 transition-all resize-none leading-relaxed"
         />
       </div>

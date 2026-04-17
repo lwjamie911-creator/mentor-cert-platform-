@@ -95,28 +95,17 @@ export function MentorProfileViewer({ mentorId, mentorName }: Props) {
               {/* Divider */}
               <div className="h-px bg-indigo-100" />
 
-              {/* Project experience */}
-              {p.projectExperience && (
+              {/* Intro */}
+              {(p.projectExperience || p.highlights) && (
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-base">📂</span>
-                    <h3 className="text-sm font-bold text-gray-800">过往项目经验</h3>
+                    <span className="text-base">📝</span>
+                    <h3 className="text-sm font-bold text-gray-800">个人介绍</h3>
                   </div>
                   <div className="bg-white rounded-xl border border-indigo-100 px-4 py-3 shadow-sm">
-                    <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{p.projectExperience}</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Highlights */}
-              {p.highlights && (
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-base">🏆</span>
-                    <h3 className="text-sm font-bold text-gray-800">高光成绩</h3>
-                  </div>
-                  <div className="bg-white rounded-xl border border-amber-100 px-4 py-3 shadow-sm">
-                    <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{p.highlights}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+                      {[p.projectExperience, p.highlights].filter(Boolean).join('\n\n')}
+                    </p>
                   </div>
                 </div>
               )}
