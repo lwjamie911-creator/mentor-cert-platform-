@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { MentorCoursesManager } from './mentor-courses-manager'
 import { NewbieCoursesManager } from './newbie-courses-manager'
+import { GraduationCap, Sprout } from 'lucide-react'
 
 interface Material {
   id: string
@@ -30,26 +31,26 @@ export function CoursesTabClient({
   return (
     <>
       {/* 标签页切换 */}
-      <div className="flex gap-2 border-b border-gray-200 pb-0">
+      <div className="flex gap-2 border-b border-line pb-0">
         <button
           onClick={() => setTab('mentor')}
-          className={`px-4 py-2 text-sm font-semibold transition-colors -mb-px ${
+          className={`flex items-center gap-1.5 px-4 py-2 text-sm font-semibold transition-all -mb-px ${
             tab === 'mentor'
-              ? 'text-amber-700 border-b-2 border-amber-500 bg-white'
-              : 'text-gray-400 hover:text-gray-600'
+              ? 'text-cocoa-900 border-b-2 border-cocoa-700 bg-paper'
+              : 'text-cocoa-400 hover:text-cocoa-600'
           }`}
         >
-          🎓 导师专区
+          <GraduationCap className="w-4 h-4" strokeWidth={2} /> 导师专区
         </button>
         <button
           onClick={() => setTab('newbie')}
-          className={`px-4 py-2 text-sm font-semibold transition-colors -mb-px ${
+          className={`flex items-center gap-1.5 px-4 py-2 text-sm font-semibold transition-all -mb-px ${
             tab === 'newbie'
-              ? 'text-blue-700 border-b-2 border-blue-500 bg-white'
-              : 'text-gray-400 hover:text-gray-600'
+              ? 'text-cocoa-900 border-b-2 border-cocoa-700 bg-paper'
+              : 'text-cocoa-400 hover:text-cocoa-600'
           }`}
         >
-          🌱 新人专区
+          <Sprout className="w-4 h-4" strokeWidth={2} /> 新人专区
         </button>
       </div>
 

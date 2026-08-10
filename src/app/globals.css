@@ -4,12 +4,32 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #17191c;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 衬线标题 —— 编辑感大标题（参考 DESIGN.md）。
+   用系统自带中文衬线字体栈，零网络依赖、首屏无延迟：
+   思源宋体(若装) → Mac 宋体-简/华文宋体 → Windows 宋体 → 通用 serif */
+.font-display {
+  font-family: 'Source Han Serif SC', 'Noto Serif SC', 'Songti SC', 'STSong',
+    'SimSun', ui-serif, Georgia, 'Times New Roman', serif;
+  letter-spacing: -0.015em;
+}
+
+/* 交互通用过渡：按钮/链接的颜色、阴影、位移平滑 */
+@layer base {
+  button, a {
+    transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 180ms;
+  }
 }
 
 @media print {

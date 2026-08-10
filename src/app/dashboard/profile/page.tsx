@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
+import { ArrowLeft, Lock, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
-const inputCls = 'w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 bg-white transition-all'
-const labelCls = 'block text-xs font-semibold text-gray-500 mb-1.5'
+const inputCls = 'w-full px-4 h-11 border border-cocoa-300 rounded-lg bg-cocoa-50/50 text-sm text-cocoa-900 placeholder:text-cocoa-400 focus:outline-none focus:border-cocoa-600 focus:ring-2 focus:ring-cocoa-600/15 focus:bg-paper transition-all'
+const labelCls = 'block text-[13px] font-medium text-cocoa-800 mb-1.5'
 
 export default function ProfilePage() {
   const [form, setForm]       = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
@@ -47,29 +49,29 @@ export default function ProfilePage() {
       {/* 页头 */}
       <div>
         <Link href="/zone"
-          className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-indigo-600 transition-colors mb-3">
-          ← 返回首页
+          className="inline-flex items-center gap-1 text-sm text-cocoa-500 hover:text-cocoa-800 transition-colors mb-3">
+          <ArrowLeft className="w-4 h-4" strokeWidth={2} /> 返回首页
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">个人设置</h1>
+        <h1 className="font-display text-2xl text-cocoa-900 tracking-tight">个人设置</h1>
       </div>
 
       {/* 修改密码卡片 */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden max-w-md">
-        <div className="px-5 py-4 border-b border-gray-50"
-          style={{ background: 'linear-gradient(135deg, #f8f7ff, #ede9fe)' }}>
+      <div className="bg-paper rounded-2xl border border-line shadow-card overflow-hidden max-w-md">
+        <div className="px-5 py-4 border-b border-line/70"
+          style={{ background: 'linear-gradient(135deg, #fdf4ec, #fbe6d6)' }}>
           <div className="flex items-center gap-2">
-            <span>🔒</span>
-            <h2 className="font-bold text-indigo-800 text-sm">修改密码</h2>
+            <Lock className="w-4 h-4 text-cocoa-700" strokeWidth={2} />
+            <h2 className="font-medium text-cocoa-900 text-sm">修改密码</h2>
           </div>
         </div>
 
         <div className="p-5">
           {success ? (
-            <div className="flex items-center gap-3 text-green-700 bg-green-50 border border-green-100 rounded-xl px-4 py-4 text-sm">
-              <span className="text-xl">✅</span>
+            <div className="flex items-center gap-3 text-cocoa-800 bg-cocoa-50 border border-cocoa-200 rounded-lg px-4 py-4 text-sm animate-fade-in">
+              <CheckCircle2 className="w-6 h-6 text-cocoa-700 flex-shrink-0" strokeWidth={2} />
               <div>
-                <p className="font-semibold">密码修改成功！</p>
-                <p className="text-xs text-green-600 mt-0.5">即将跳转到登录页重新登录…</p>
+                <p className="font-medium">密码修改成功！</p>
+                <p className="text-xs text-cocoa-500 mt-0.5">即将跳转到登录页重新登录…</p>
               </div>
             </div>
           ) : (
@@ -113,19 +115,16 @@ export default function ProfilePage() {
               </div>
 
               {error && (
-                <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 border border-red-100 px-4 py-3 rounded-xl">
-                  <span>⚠️</span> {error}
+                <div className="flex items-center gap-2 text-sienna text-sm bg-blush/60 border border-cocoa-200 px-4 py-2.5 rounded-lg animate-fade-in">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" strokeWidth={2} /> {error}
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-2.5 px-4 rounded-xl text-sm font-semibold text-white shadow-sm transition-all disabled:opacity-60"
-                style={{ background: loading ? '#a5b4fc' : 'linear-gradient(90deg, #4f46e5, #7c3aed)' }}
-              >
-                {loading ? '修改中…' : '确认修改'}
-              </button>
+              <Button type="submit" disabled={loading} className="w-full mt-1">
+                {loading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} /> 修改中…</>
+                ) : '确认修改'}
+              </Button>
             </form>
           )}
         </div>

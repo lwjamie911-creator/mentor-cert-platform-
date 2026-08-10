@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { PartyPopper, X } from 'lucide-react'
 
 interface Props {
   newbiesDone: { pairId: string; name: string | null }[]
@@ -26,18 +27,20 @@ export function NewbieDoneAlert({ newbiesDone }: Props) {
   if (visible.length === 0) return null
 
   return (
-    <div className="rounded-xl border border-green-200 bg-green-50 px-5 py-4 flex items-start gap-3">
-      <span className="text-xl mt-0.5">🎉</span>
+    <div className="rounded-lg border border-cocoa-300 bg-cocoa-100/70 px-5 py-4 flex items-start gap-3 animate-fade-in">
+      <span className="w-8 h-8 rounded-lg bg-cocoa-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <PartyPopper className="w-4 h-4 text-cocoa-800" strokeWidth={2} />
+      </span>
       <div className="flex-1">
-        <p className="font-semibold text-green-800 text-sm">{visible.length} 位新人已完成全部考核！</p>
-        <p className="text-green-600 text-xs mt-0.5">{visible.map(n => n.name ?? '—').join('、')} 已达标</p>
+        <p className="font-semibold text-cocoa-900 text-sm">{visible.length} 位新人已完成全部考核！</p>
+        <p className="text-cocoa-600 text-xs mt-0.5">{visible.map(n => n.name ?? '—').join('、')} 已达标</p>
       </div>
       <button
         onClick={dismiss}
-        className="text-green-400 hover:text-green-600 text-lg leading-none flex-shrink-0 mt-0.5 transition-colors"
+        className="text-cocoa-400 hover:text-cocoa-700 leading-none flex-shrink-0 mt-0.5 transition-colors"
         title="知道了，不再提示"
       >
-        ×
+        <X className="w-4 h-4" strokeWidth={2} />
       </button>
     </div>
   )

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { GraduationCap, PartyPopper, Check, X, ArrowRight, ArrowLeft } from 'lucide-react'
 import { MatchingQuestion } from '@/components/matching-question'
 
 interface Question {
@@ -68,41 +69,48 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
     const passed = result.passed
     return (
       <div className="max-w-lg mx-auto text-center py-8">
-        <div className={`rounded-3xl p-10 mb-6 relative overflow-hidden ${passed
-          ? 'bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200'
-          : 'bg-gradient-to-br from-gray-50 to-slate-100 border border-gray-200'}`}>
-          <div className="absolute top-[-20px] right-[-20px] text-8xl opacity-10">{passed ? '🎓' : '📝'}</div>
-          <div className="text-6xl mb-4">{passed ? '🎉' : '😅'}</div>
-          <div className={`text-7xl font-black mb-2 ${passed ? 'text-blue-500' : 'text-gray-400'}`}>
-            {result.score}
-            <span className="text-2xl font-normal ml-1">分</span>
-          </div>
-          <div className={`text-sm font-medium mb-1 ${passed ? 'text-blue-700' : 'text-gray-500'}`}>
-            答对 {result.correctCount} / {result.total} 题
-          </div>
-          <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold mt-2
-            ${passed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
-            {passed ? '✓ 通过' : '✗ 未通过（需 80 分）'}
+        <div className={`rounded-2xl p-10 mb-6 relative overflow-hidden border ${passed
+          ? 'bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200'
+          : 'bg-gradient-to-br from-petal-50 to-petal-100 border-petal-200'}`}>
+          <GraduationCap className={`absolute top-2 right-2 w-24 h-24 ${passed ? 'text-emerald-200/50' : 'text-petal-200/50'}`} strokeWidth={1.5} />
+          <div className="relative z-10">
+            <div className="flex justify-center mb-4">
+              {passed
+                ? <PartyPopper className="w-14 h-14 text-emerald-600" strokeWidth={1.75} />
+                : <span className="text-5xl">😅</span>}
+            </div>
+            <div className={`text-7xl font-display font-black mb-2 ${passed ? 'text-emerald-600' : 'text-petal-700'}`}>
+              {result.score}
+              <span className="text-2xl font-normal ml-1">分</span>
+            </div>
+            <div className={`text-sm font-medium mb-1 ${passed ? 'text-emerald-700' : 'text-cocoa-500'}`}>
+              答对 {result.correctCount} / {result.total} 题
+            </div>
+            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold mt-2
+              ${passed ? 'bg-emerald-600 text-white' : 'bg-blush/70 text-sienna'}`}>
+              {passed
+                ? <><Check className="w-3.5 h-3.5" strokeWidth={2.5} /> 通过</>
+                : <><X className="w-3.5 h-3.5" strokeWidth={2.5} /> 未通过（需 80 分）</>}
+            </div>
           </div>
         </div>
 
         {passed && (
-          <p className="text-gray-500 text-sm mb-6">恭喜！完成证书已颁发，记录你的成长里程碑 🌱</p>
+          <p className="text-cocoa-500 text-sm mb-6">恭喜！完成证书已颁发，记录你的成长里程碑</p>
         )}
 
         <div className="flex gap-3 justify-center">
           {passed ? (
             <Link href="/newbie/certificate"
-              className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white shadow-sm"
-              style={{ background: 'linear-gradient(90deg, #3b82f6, #6366f1)' }}
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-lg text-sm font-medium text-paper bg-petal-700 hover:bg-petal-800 hover:-translate-y-0.5 hover:shadow-subtle shadow-card transition-all active:scale-[0.97]"
             >
-              🎓 查看完成证书 →
+              <GraduationCap className="w-4 h-4" strokeWidth={2} /> 查看完成证书 <ArrowRight className="w-4 h-4" strokeWidth={2} />
             </Link>
           ) : (
             <Link href="/newbie"
-              className="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:text-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 px-7 py-3 rounded-lg text-sm font-medium bg-paper border border-petal-300 text-petal-700 hover:border-petal-500 hover:text-petal-900 hover:bg-petal-50 transition-all"
             >
-              ← 返回重试
+              <ArrowLeft className="w-4 h-4" strokeWidth={2} /> 返回重试
             </Link>
           )}
         </div>
@@ -116,20 +124,20 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">新人知识测试</h1>
-            <p className="text-sm text-gray-400 mt-0.5">{questions.length} 道客观题 + 1 道主观题 · 客观 80 分及以上通过</p>
+            <h1 className="text-xl font-display font-bold text-petal-900">新人知识测试</h1>
+            <p className="text-sm text-cocoa-400 mt-0.5">{questions.length} 道客观题 + 1 道主观题 · 客观 80 分及以上通过</p>
           </div>
           <div className="text-right">
-            <span className="text-2xl font-black text-blue-500">{answeredCount}</span>
-            <span className="text-gray-400 text-sm">/{questions.length}</span>
-            <p className="text-xs text-gray-400">已作答</p>
+            <span className="text-2xl font-black text-petal-600">{answeredCount}</span>
+            <span className="text-cocoa-400 text-sm">/{questions.length}</span>
+            <p className="text-xs text-cocoa-400">已作答</p>
           </div>
         </div>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-2 bg-petal-100 rounded-full overflow-hidden">
           <div className="h-full rounded-full transition-all duration-500"
             style={{
               width: `${(answeredCount / questions.length) * 100}%`,
-              background: 'linear-gradient(90deg, #3b82f6, #6366f1)',
+              background: 'linear-gradient(90deg, #c05e6d, #e59aa4)',
             }} />
         </div>
       </div>
@@ -146,18 +154,18 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
             const connectedCount = Object.keys(val).length
 
             return (
-              <div key={q.id} className={`bg-white rounded-2xl border-2 p-5 transition-all duration-200
-                ${answered ? 'border-blue-200' : 'border-gray-100 hover:border-gray-200'}`}>
+              <div key={q.id} className={`bg-paper rounded-2xl border-2 p-5 transition-all duration-200
+                ${answered ? 'border-petal-300' : 'border-line hover:border-petal-200'}`}>
                 <div className="flex items-start gap-3 mb-2">
                   <span className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
-                    ${answered ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                    ${answered ? 'bg-petal-600 text-white' : 'bg-petal-50 text-cocoa-400'}`}>
                     {answered ? '✓' : i + 1}
                   </span>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 leading-relaxed">{q.content}</p>
+                    <p className="text-sm font-medium text-cocoa-900 leading-relaxed">{q.content}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">连线题</span>
-                      <span className="text-xs text-gray-400">{connectedCount}/{leftItems.length} 已连线</span>
+                      <span className="text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">连线题</span>
+                      <span className="text-xs text-cocoa-400">{connectedCount}/{leftItems.length} 已连线</span>
                     </div>
                   </div>
                 </div>
@@ -179,16 +187,16 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
           const typeLabel = q.type === 'multiple' ? '多选' : q.type === 'truefalse' ? '判断' : '单选'
 
           return (
-            <div key={q.id} className={`bg-white rounded-2xl border-2 p-5 transition-all duration-200
-              ${answered ? 'border-blue-200' : 'border-gray-100 hover:border-gray-200'}`}>
+            <div key={q.id} className={`bg-paper rounded-2xl border-2 p-5 transition-all duration-200
+              ${answered ? 'border-petal-300' : 'border-line hover:border-petal-200'}`}>
               <div className="flex items-start gap-3 mb-4">
                 <span className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
-                  ${answered ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                  ${answered ? 'bg-petal-600 text-white' : 'bg-petal-50 text-cocoa-400'}`}>
                   {answered ? '✓' : i + 1}
                 </span>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900 leading-relaxed">{q.content}</p>
-                  <span className="inline-block mt-1 text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{typeLabel}</span>
+                  <p className="text-sm font-medium text-cocoa-900 leading-relaxed">{q.content}</p>
+                  <span className="inline-block mt-1 text-xs text-petal-700 bg-petal-100 px-2 py-0.5 rounded-full">{typeLabel}</span>
                 </div>
               </div>
               <div className="space-y-2 pl-10">
@@ -200,10 +208,10 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
                   return (
                     <label key={oi} className={`flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer transition-all
                       ${isSelected
-                        ? 'bg-blue-50 border-2 border-blue-300 text-blue-900'
-                        : 'border-2 border-gray-100 hover:border-blue-100 hover:bg-blue-50/50 text-gray-700'}`}>
+                        ? 'bg-petal-50 border-2 border-petal-300 text-petal-900'
+                        : 'border-2 border-line hover:border-petal-200 hover:bg-petal-50/50 text-cocoa-700'}`}>
                       <span className={`w-5 h-5 rounded flex items-center justify-center text-xs font-bold flex-shrink-0
-                        ${isSelected ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                        ${isSelected ? 'bg-petal-600 text-white' : 'bg-petal-50 text-cocoa-400'}`}>
                         {key}
                       </span>
                       <input
@@ -225,14 +233,14 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
       </div>
 
       {/* 主观题 */}
-      <div className="bg-white rounded-2xl border-2 border-indigo-100 p-5 mb-6">
+      <div className="bg-paper rounded-2xl border-2 border-amber-100 p-5 mb-6">
         <div className="flex items-start gap-3 mb-3">
-          <span className="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold">
+          <span className="flex-shrink-0 w-7 h-7 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-bold">
             {questions.length + 1}
           </span>
           <div>
-            <p className="text-sm font-medium text-gray-900 leading-relaxed">{SUBJECTIVE_QUESTION}</p>
-            <span className="inline-block mt-1 text-xs text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">开放题 · 不计入分数</span>
+            <p className="text-sm font-medium text-cocoa-900 leading-relaxed">{SUBJECTIVE_QUESTION}</p>
+            <span className="inline-block mt-1 text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">开放题 · 不计入分数</span>
           </div>
         </div>
         <textarea
@@ -240,10 +248,10 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
           onChange={e => setSubjectiveAnswer(e.target.value)}
           placeholder="请输入你的回答，与导师共同见证你的成长..."
           rows={5}
-          className="w-full px-4 py-3 border-2 border-gray-100 rounded-xl text-sm focus:outline-none focus:border-indigo-200 resize-none text-gray-700 bg-gray-50/50 transition-colors"
+          className="w-full px-4 py-3 border-2 border-line rounded-xl text-sm focus:outline-none focus:border-amber-200 resize-none text-cocoa-700 bg-fog transition-colors"
         />
         {subjectiveAnswer.length > 0 && (
-          <p className="text-xs text-right text-gray-300 mt-1">{subjectiveAnswer.length} 字</p>
+          <p className="text-xs text-right text-cocoa-300 mt-1">{subjectiveAnswer.length} 字</p>
         )}
       </div>
 
@@ -255,8 +263,8 @@ export function NewbieExamClient({ questions }: { questions: Question[] }) {
           className="w-full py-3.5 rounded-2xl font-bold text-sm text-white shadow-lg transition-all"
           style={{
             background: answeredCount < questions.length || submitting
-              ? '#d1d5db'
-              : 'linear-gradient(90deg, #3b82f6, #6366f1)',
+              ? '#e0cdd0'
+              : 'linear-gradient(90deg, #c05e6d, #9d4552)',
           }}
         >
           {submitting ? '提交中...' : answeredCount < questions.length

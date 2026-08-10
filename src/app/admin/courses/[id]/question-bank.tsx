@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { HelpCircle, Plus, Save, Pencil } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface Question {
   id: string
@@ -18,20 +20,20 @@ interface QuestionBankProps {
 }
 
 const typeConfig: Record<string, { label: string; color: string }> = {
-  single:    { label: '单选', color: 'bg-blue-50 text-blue-600' },
-  multiple:  { label: '多选', color: 'bg-violet-50 text-violet-600' },
-  truefalse: { label: '判断', color: 'bg-amber-50 text-amber-600' },
-  matching:  { label: '连线', color: 'bg-emerald-50 text-emerald-600' },
+  single:    { label: '单选', color: 'bg-cocoa-100 text-cocoa-700' },
+  multiple:  { label: '多选', color: 'bg-cocoa-100 text-cocoa-700' },
+  truefalse: { label: '判断', color: 'bg-cocoa-100 text-cocoa-700' },
+  matching:  { label: '连线', color: 'bg-cocoa-100 text-cocoa-700' },
 }
 
 const difficultyConfig: Record<number, { label: string; color: string }> = {
   1: { label: '简单', color: 'bg-green-50 text-green-600' },
-  2: { label: '中等', color: 'bg-orange-50 text-orange-500' },
+  2: { label: '中等', color: 'bg-blush/60 text-sienna' },
   3: { label: '困难', color: 'bg-red-50 text-red-500' },
 }
 
-const inputCls = 'w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 bg-white transition-all'
-const labelCls = 'block text-xs font-semibold text-gray-500 mb-1.5'
+const inputCls = 'w-full px-3 py-2 border border-cocoa-300 rounded-lg text-sm text-cocoa-900 placeholder:text-cocoa-400 focus:outline-none focus:ring-2 focus:ring-cocoa-600/15 focus:border-cocoa-600 bg-cocoa-50/50 transition-all'
+const labelCls = 'block text-xs font-semibold text-cocoa-600 mb-1.5'
 
 export function QuestionBank({ courseId, chapterId, questions, scope }: QuestionBankProps) {
   const router = useRouter()
@@ -152,13 +154,13 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
       {/* 题目列表 */}
       <div className="space-y-2 mb-4">
         {questions.map((q, i) => {
-          const tc = typeConfig[q.type] ?? { label: q.type, color: 'bg-gray-100 text-gray-500' }
+          const tc = typeConfig[q.type] ?? { label: q.type, color: 'bg-cocoa-50 text-cocoa-500' }
           const dc = difficultyConfig[q.difficulty] ?? difficultyConfig[1]
           return (
             <div key={q.id}
-              className="flex items-start gap-3 bg-gray-50 hover:bg-purple-50/30 border border-gray-100 hover:border-purple-200 rounded-xl px-4 py-3 transition-all group">
+              className="flex items-start gap-3 bg-cocoa-50/60 hover:bg-cocoa-100/60 border border-line hover:border-cocoa-300 rounded-xl px-4 py-3 transition-all group">
               {/* 序号 */}
-              <div className="w-6 h-6 rounded-md bg-white border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-400 flex-shrink-0 mt-0.5">
+              <div className="w-6 h-6 rounded-md bg-paper border border-cocoa-200 flex items-center justify-center text-xs font-bold text-cocoa-500 flex-shrink-0 mt-0.5">
                 {i + 1}
               </div>
 
@@ -168,7 +170,7 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${tc.color}`}>{tc.label}</span>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${dc.color}`}>{dc.label}</span>
                 </div>
-                <p className="text-sm text-gray-800 leading-relaxed">{q.content}</p>
+                <p className="text-sm text-cocoa-800 leading-relaxed">{q.content}</p>
               </div>
 
               {/* 删除 */}
@@ -184,8 +186,8 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
         })}
 
         {questions.length === 0 && (
-          <div className="text-center py-10 text-gray-300">
-            <div className="text-3xl mb-2">❓</div>
+          <div className="text-center py-10 text-cocoa-400">
+            <HelpCircle className="w-8 h-8 mx-auto mb-2 text-cocoa-300" strokeWidth={1.5} />
             <p className="text-sm">暂无题目，点击下方添加</p>
           </div>
         )}
@@ -195,15 +197,15 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
       {!showForm ? (
         <button
           onClick={() => setShowForm(true)}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-purple-600 border border-purple-200 hover:bg-purple-50 transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-cocoa-700 border border-cocoa-300 hover:bg-cocoa-100 transition-all active:scale-[0.97]"
         >
-          + 添加题目
+          <Plus className="w-4 h-4" strokeWidth={2} /> 添加题目
         </button>
       ) : (
-        <div className="bg-gradient-to-br from-gray-50 to-indigo-50/30 rounded-2xl border border-indigo-100 p-5 space-y-4 mt-2">
+        <div className="bg-cocoa-50/60 rounded-2xl border border-cocoa-200 p-5 space-y-4 mt-2">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-base">✏️</span>
-            <h3 className="font-bold text-sm text-indigo-800">添加新题目</h3>
+            <Pencil className="w-4 h-4 text-cocoa-700" strokeWidth={2} />
+            <h3 className="font-semibold text-sm text-cocoa-900">添加新题目</h3>
           </div>
 
           {/* 题型 + 难度 */}
@@ -242,7 +244,7 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
               <div className="grid grid-cols-2 gap-2">
                 {(['A', 'B', 'C', 'D'] as const).map((letter) => (
                   <div key={letter} className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-600 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                    <span className="w-6 h-6 rounded-lg bg-cocoa-100 text-cocoa-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
                       {letter}
                     </span>
                     <input
@@ -270,10 +272,10 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
                     key={opt}
                     type="button"
                     onClick={() => toggleAnswer(opt)}
-                    className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all active:scale-[0.97] ${
                       form.answer.includes(opt)
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                        : 'bg-white border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-500'
+                        ? 'bg-cocoa-800 text-paper border-cocoa-800 shadow-card'
+                        : 'bg-paper border-cocoa-300 text-cocoa-600 hover:border-cocoa-500 hover:text-cocoa-800'
                     }`}
                   >
                     {form.type === 'truefalse' ? (opt === 'A' ? '✓ 正确' : '✗ 错误') : opt}
@@ -299,7 +301,7 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
                       className={inputCls}
                       placeholder="左侧项"
                     />
-                    <span className="text-gray-300 flex-shrink-0">→</span>
+                    <span className="text-cocoa-300 flex-shrink-0">→</span>
                     <input
                       value={pair.right}
                       onChange={e => updateMatchingPair(idx, 'right', e.target.value)}
@@ -309,7 +311,7 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
                     {form.matchingPairs.length > 2 && (
                       <button
                         onClick={() => removeMatchingPair(idx)}
-                        className="flex-shrink-0 w-6 h-6 rounded-full text-gray-400 hover:text-red-400 hover:bg-red-50 transition-colors text-sm"
+                        className="flex-shrink-0 w-6 h-6 rounded-full text-cocoa-400 hover:text-red-400 hover:bg-red-50 transition-colors text-sm"
                       >
                         ×
                       </button>
@@ -323,7 +325,7 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
               >
                 + 增加一对
               </button>
-              <p className="text-xs text-gray-400 mt-1">右侧项将在答题时被随机打乱顺序，学员需要将其正确匹配到左侧</p>
+              <p className="text-xs text-cocoa-400 mt-1">右侧项将在答题时被随机打乱顺序，学员需要将其正确匹配到左侧</p>
             </div>
           )}
 
@@ -337,20 +339,12 @@ export function QuestionBank({ courseId, chapterId, questions, scope }: Question
 
           {/* 操作按钮 */}
           <div className="flex gap-2 pt-1">
-            <button
-              onClick={saveQuestion}
-              disabled={saving}
-              className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-60"
-              style={{ background: saving ? '#a5b4fc' : 'linear-gradient(90deg, #4f46e5, #7c3aed)' }}
-            >
-              {saving ? '保存中…' : '💾 保存题目'}
-            </button>
-            <button
-              onClick={() => setShowForm(false)}
-              className="px-4 py-2 rounded-xl text-sm font-medium text-gray-500 border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
+            <Button size="sm" onClick={saveQuestion} disabled={saving}>
+              <Save className="w-4 h-4" strokeWidth={2} /> {saving ? '保存中…' : '保存题目'}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}>
               取消
-            </button>
+            </Button>
           </div>
         </div>
       )}

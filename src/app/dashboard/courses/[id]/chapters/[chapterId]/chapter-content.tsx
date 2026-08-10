@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import Link from 'next/link'
+import { FileText, Link2, Check, ArrowRight, ClipboardList } from 'lucide-react'
 
 interface Props {
   chapter: {
@@ -51,28 +52,30 @@ export function ChapterContent({ chapter, courseId, isCompleted, hasQuestions }:
   return (
     <div className="space-y-4">
       {/* 内容区 */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      <div className="bg-paper rounded-2xl border border-line shadow-card p-6">
         {chapter.contentType === 'text' && chapter.contentText && (
-          <div className="prose prose-sm max-w-none prose-headings:text-gray-800 prose-p:text-gray-600 prose-p:leading-relaxed">
+          <div className="prose prose-sm max-w-none prose-headings:text-cocoa-900 prose-p:text-cocoa-700 prose-p:leading-relaxed prose-a:text-cocoa-800 prose-strong:text-cocoa-800">
             <ReactMarkdown>{chapter.contentText}</ReactMarkdown>
           </div>
         )}
 
         {chapter.contentType === 'pdf' && chapter.contentUrl && (
           <div className="text-center py-8">
-            <div className="text-5xl mb-4">📄</div>
-            <p className="text-sm text-gray-500 mb-4">点击下方按钮打开 PDF 文件阅读</p>
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-cocoa-100 mb-4">
+              <FileText className="w-7 h-7 text-cocoa-700" strokeWidth={2} />
+            </div>
+            <p className="text-sm text-cocoa-600 mb-4">点击下方按钮打开 PDF 文件阅读</p>
             <a
               href={chapter.contentUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: 'linear-gradient(90deg, #3b82f6, #6366f1)' }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all active:scale-[0.97] hover:-translate-y-0.5"
+              style={{ background: 'linear-gradient(90deg, #5d2a1a, #7a4230)' }}
             >
-              📄 打开 PDF 文件
+              <FileText className="w-4 h-4" strokeWidth={2} /> 打开 PDF 文件
             </a>
             {minSeconds > 0 && (
-              <p className="text-xs text-gray-400 mt-4">
+              <p className="text-xs text-cocoa-500 mt-4">
                 请至少阅读 {Math.ceil(minSeconds / 60)} 分钟后标记完成
               </p>
             )}
@@ -81,19 +84,21 @@ export function ChapterContent({ chapter, courseId, isCompleted, hasQuestions }:
 
         {chapter.contentType === 'external_link' && chapter.contentUrl && (
           <div className="text-center py-8">
-            <div className="text-5xl mb-4">🔗</div>
-            <p className="text-sm text-gray-500 mb-4">点击下方按钮跳转到学习资料</p>
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-cocoa-100 mb-4">
+              <Link2 className="w-7 h-7 text-cocoa-700" strokeWidth={2} />
+            </div>
+            <p className="text-sm text-cocoa-600 mb-4">点击下方按钮跳转到学习资料</p>
             <a
               href={chapter.contentUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: 'linear-gradient(90deg, #3b82f6, #6366f1)' }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all active:scale-[0.97] hover:-translate-y-0.5"
+              style={{ background: 'linear-gradient(90deg, #5d2a1a, #7a4230)' }}
             >
-              🔗 打开外部链接
+              <Link2 className="w-4 h-4" strokeWidth={2} /> 打开外部链接
             </a>
             {minSeconds > 0 && (
-              <p className="text-xs text-gray-400 mt-4">
+              <p className="text-xs text-cocoa-500 mt-4">
                 请至少停留 {Math.ceil(minSeconds / 60)} 分钟后标记完成
               </p>
             )}
@@ -102,31 +107,33 @@ export function ChapterContent({ chapter, courseId, isCompleted, hasQuestions }:
       </div>
 
       {/* 底部操作栏 */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+      <div className="bg-paper rounded-2xl border border-line shadow-card px-5 py-4">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           {/* 计时区 */}
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {!done && minSeconds > 0 && (
               <>
                 <div className="flex-1 max-w-[180px]">
-                  <div className="flex justify-between text-xs text-gray-400 mb-1">
+                  <div className="flex justify-between text-xs text-cocoa-500 mb-1">
                     <span>阅读进度</span>
                     <span>{pct}%</span>
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-1.5">
+                  <div className="w-full bg-cocoa-100 rounded-full h-1.5">
                     <div
                       className="h-1.5 rounded-full transition-all"
-                      style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #3b82f6, #6366f1)' }}
+                      style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #9a5c44, #5d2a1a)' }}
                     />
                   </div>
                 </div>
-                <span className="text-xs text-gray-400 flex-shrink-0">
-                  {canComplete ? '可以完成了 ✓' : `还需 ${remaining} 秒`}
+                <span className="inline-flex items-center gap-1 text-xs text-cocoa-500 flex-shrink-0">
+                  {canComplete ? <><Check className="w-3.5 h-3.5 text-emerald-600" strokeWidth={2.5} /> 可以完成了</> : `还需 ${remaining} 秒`}
                 </span>
               </>
             )}
             {done && (
-              <span className="text-sm text-green-600 font-medium">✓ 本章节已完成</span>
+              <span className="inline-flex items-center gap-1 text-sm text-emerald-600 font-medium">
+                <Check className="w-4 h-4" strokeWidth={2.5} /> 本章节已完成
+              </span>
             )}
           </div>
 
@@ -135,9 +142,9 @@ export function ChapterContent({ chapter, courseId, isCompleted, hasQuestions }:
             {done && hasQuestions && (
               <Link
                 href={`/dashboard/courses/${courseId}/chapters/${chapter.id}/quiz`}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-indigo-600 border border-indigo-200 hover:bg-indigo-50 transition-colors"
+                className="inline-flex items-center gap-1 px-4 py-2 rounded-lg text-xs font-semibold text-cocoa-800 border border-cocoa-300 hover:bg-cocoa-50 transition-all active:scale-[0.97] hover:-translate-y-0.5"
               >
-                📝 章节测验
+                <ClipboardList className="w-3.5 h-3.5" strokeWidth={2} /> 章节测验
               </Link>
             )}
 
@@ -145,18 +152,18 @@ export function ChapterContent({ chapter, courseId, isCompleted, hasQuestions }:
               <button
                 onClick={markComplete}
                 disabled={!canComplete || marking}
-                className="px-5 py-2 rounded-xl text-sm font-semibold text-white shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ background: canComplete ? 'linear-gradient(90deg, #22c55e, #16a34a)' : undefined,
-                         backgroundColor: !canComplete ? '#d1d5db' : undefined }}
+                className="inline-flex items-center gap-1 px-5 py-2 rounded-lg text-sm font-semibold text-white shadow-card transition-all active:scale-[0.97] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                style={{ background: canComplete ? 'linear-gradient(90deg, #16a34a, #15803d)' : undefined,
+                         backgroundColor: !canComplete ? '#cf9c84' : undefined }}
               >
-                {marking ? '保存中…' : canComplete ? '✅ 标记完成' : `还需 ${remaining} 秒`}
+                {marking ? '保存中…' : canComplete ? <><Check className="w-4 h-4" strokeWidth={2.5} /> 标记完成</> : `还需 ${remaining} 秒`}
               </button>
             ) : (
               <Link
                 href={`/dashboard/courses/${courseId}`}
-                className="px-5 py-2 rounded-xl text-sm font-semibold text-indigo-600 border border-indigo-200 hover:bg-indigo-50 transition-colors"
+                className="inline-flex items-center gap-1 px-5 py-2 rounded-lg text-sm font-semibold text-cocoa-800 border border-cocoa-300 hover:bg-cocoa-50 transition-all active:scale-[0.97] hover:-translate-y-0.5"
               >
-                返回课程 →
+                返回课程 <ArrowRight className="w-4 h-4" strokeWidth={2} />
               </Link>
             )}
           </div>

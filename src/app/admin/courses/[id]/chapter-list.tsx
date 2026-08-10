@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { BookOpen, Plus } from 'lucide-react'
 
 interface Chapter {
   id: string
@@ -14,9 +15,9 @@ interface Chapter {
 }
 
 const contentTypeLabel: Record<string, { label: string; color: string }> = {
-  text:    { label: '图文', color: 'bg-blue-50 text-blue-600' },
-  pdf:     { label: 'PDF', color: 'bg-red-50 text-red-500' },
-  link:    { label: '外链', color: 'bg-green-50 text-green-600' },
+  text:    { label: '图文', color: 'bg-cocoa-100 text-cocoa-700' },
+  pdf:     { label: 'PDF', color: 'bg-cocoa-100 text-cocoa-700' },
+  link:    { label: '外链', color: 'bg-cocoa-100 text-cocoa-700' },
 }
 
 export function ChapterList({ courseId, chapters }: { courseId: string; chapters: Chapter[] }) {
@@ -35,26 +36,26 @@ export function ChapterList({ courseId, chapters }: { courseId: string; chapters
     <div>
       <div className="space-y-2 mb-4">
         {chapters.map((ch, idx) => {
-          const ct = contentTypeLabel[ch.contentType] ?? { label: ch.contentType, color: 'bg-gray-100 text-gray-500' }
+          const ct = contentTypeLabel[ch.contentType] ?? { label: ch.contentType, color: 'bg-cocoa-100 text-cocoa-600' }
           return (
             <div key={ch.id}
-              className="flex items-center gap-3 bg-gray-50 hover:bg-blue-50/40 border border-gray-100 hover:border-blue-200 rounded-xl px-4 py-3 transition-all group">
+              className="flex items-center gap-3 bg-cocoa-50/60 hover:bg-cocoa-100/60 border border-line hover:border-cocoa-300 rounded-xl px-4 py-3 transition-all group">
               {/* 序号 */}
-              <div className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-400 flex-shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-paper border border-cocoa-200 flex items-center justify-center text-xs font-bold text-cocoa-500 flex-shrink-0">
                 {idx + 1}
               </div>
 
               {/* 标题 + 标签 */}
               <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-medium text-gray-800 truncate">{ch.title}</span>
+                <span className="text-sm font-medium text-cocoa-800 truncate">{ch.title}</span>
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${ct.color}`}>
                   {ct.label}
                 </span>
                 {!ch.isRequired && (
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-400 flex-shrink-0">选学</span>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-cocoa-100 text-cocoa-500 flex-shrink-0">选学</span>
                 )}
                 {ch.questions.length > 0 && (
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-500 flex-shrink-0">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-blush/60 text-sienna flex-shrink-0">
                     {ch.questions.length} 道题
                   </span>
                 )}
@@ -64,7 +65,7 @@ export function ChapterList({ courseId, chapters }: { courseId: string; chapters
               <div className="flex items-center gap-2 flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
                 <Link
                   href={`/admin/courses/${courseId}/chapters/${ch.id}`}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-blue-600 border border-blue-200 hover:bg-blue-50 transition-colors"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-cocoa-700 border border-cocoa-300 hover:bg-cocoa-100 transition-colors"
                 >
                   编辑
                 </Link>
@@ -81,8 +82,8 @@ export function ChapterList({ courseId, chapters }: { courseId: string; chapters
         })}
 
         {chapters.length === 0 && (
-          <div className="text-center py-10 text-gray-300">
-            <div className="text-3xl mb-2">📖</div>
+          <div className="text-center py-10 text-cocoa-400">
+            <BookOpen className="w-8 h-8 mx-auto mb-2 text-cocoa-300" strokeWidth={1.5} />
             <p className="text-sm">暂无章节，点击下方添加</p>
           </div>
         )}
@@ -90,9 +91,9 @@ export function ChapterList({ courseId, chapters }: { courseId: string; chapters
 
       <Link
         href={`/admin/courses/${courseId}/chapters/new`}
-        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-blue-600 border border-blue-200 hover:bg-blue-50 transition-colors"
+        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-cocoa-700 border border-cocoa-300 hover:bg-cocoa-100 transition-all hover:-translate-y-0.5"
       >
-        + 添加章节
+        <Plus className="w-4 h-4" strokeWidth={2} /> 添加章节
       </Link>
     </div>
   )

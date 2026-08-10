@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import dayjs from 'dayjs'
+import { BookOpen, Check, BookMarked, Clock, ArrowRight } from 'lucide-react'
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)!
@@ -25,25 +26,25 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* 页头 */}
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-indigo-100 text-indigo-600">
+      <div className="animate-fade-up">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-cocoa-100 text-cocoa-700">
             让每一段成长，都有迹可循
           </span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">培训课程</h1>
-        <p className="text-sm text-gray-400 mt-1">
-          共 <span className="text-gray-700 font-medium">{courses.length}</span> 门课程 ·
-          已报名 <span className="text-indigo-600 font-medium">{enrolledCount}</span> 门 ·
-          已认证 <span className="text-green-600 font-medium">{completedCount}</span> 门
+        <h1 className="font-display text-2xl text-cocoa-900 tracking-tight">培训课程</h1>
+        <p className="text-sm text-cocoa-500 mt-1">
+          共 <span className="text-cocoa-800 font-medium">{courses.length}</span> 门课程 ·
+          已报名 <span className="text-cocoa-700 font-medium">{enrolledCount}</span> 门 ·
+          已认证 <span className="text-cocoa-800 font-medium">{completedCount}</span> 门
         </p>
       </div>
 
       {/* 课程列表 */}
       {courses.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm text-center py-20">
-          <div className="text-5xl mb-4">📚</div>
-          <p className="text-gray-400 text-sm">暂无课程，请等待管理员发布</p>
+        <div className="bg-paper rounded-2xl border border-line shadow-card text-center py-20">
+          <BookOpen className="w-12 h-12 text-cocoa-300 mx-auto mb-4" strokeWidth={1.5} />
+          <p className="text-cocoa-500 text-sm">暂无课程，请等待管理员发布</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -56,47 +57,51 @@ export default async function DashboardPage() {
 
             return (
               <div key={course.id}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:border-indigo-200 hover:shadow-md transition-all">
+                className="bg-paper rounded-2xl border border-line shadow-card p-5 hover:border-cocoa-300 hover:shadow-subtle hover:-translate-y-0.5 transition-all animate-fade-up">
                 <div className="flex items-start gap-4">
                   {/* 序号 */}
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0 ${
-                    isCompleted ? 'bg-green-100 text-green-600' :
-                    isEnrolled  ? 'bg-indigo-100 text-indigo-600' :
-                    'bg-gray-100 text-gray-400'
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-semibold text-sm flex-shrink-0 ${
+                    isCompleted ? 'bg-cocoa-800 text-paper' :
+                    isEnrolled  ? 'bg-cocoa-100 text-cocoa-700' :
+                    'bg-cocoa-50 text-cocoa-400'
                   }`}>
-                    {isCompleted ? '✓' : idx + 1}
+                    {isCompleted ? <Check className="w-5 h-5" strokeWidth={2.5} /> : idx + 1}
                   </div>
 
                   {/* 主信息 */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="font-semibold text-gray-900">{course.title}</span>
+                      <span className="font-semibold text-cocoa-900">{course.title}</span>
                       {isCompleted && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> 已认证
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cocoa-100 text-cocoa-800">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cocoa-700" /> 已认证
                         </span>
                       )}
                       {isExpired && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-500">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-400" /> 已过期
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blush/60 text-sienna">
+                          <span className="w-1.5 h-1.5 rounded-full bg-sienna" /> 已过期
                         </span>
                       )}
                       {isEnrolled && !isCompleted && !isExpired && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-600">
-                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" /> 学习中
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cocoa-100 text-cocoa-700">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cocoa-500 animate-pulse" /> 学习中
                         </span>
                       )}
                     </div>
 
                     {course.description && (
-                      <p className="text-xs text-gray-400 truncate mb-1.5">{course.description}</p>
+                      <p className="text-xs text-cocoa-500 truncate mb-1.5">{course.description}</p>
                     )}
 
-                    <div className="flex items-center gap-3 text-xs text-gray-400 flex-wrap">
-                      <span>📖 {course.chapters.length} 个必学章节</span>
-                      <span>⏰ {course.deadlineDays} 天内完成</span>
+                    <div className="flex items-center gap-3 text-xs text-cocoa-500 flex-wrap">
+                      <span className="inline-flex items-center gap-1">
+                        <BookMarked className="w-3.5 h-3.5" strokeWidth={2} /> {course.chapters.length} 个必学章节
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" strokeWidth={2} /> {course.deadlineDays} 天内完成
+                      </span>
                       {enrollment?.deadline && (
-                        <span className={isExpired ? 'text-red-400' : ''}>
+                        <span className={isExpired ? 'text-sienna' : ''}>
                           截止 {dayjs(enrollment.deadline).format('MM-DD')}
                         </span>
                       )}
@@ -108,22 +113,21 @@ export default async function DashboardPage() {
                     {isCompleted ? (
                       <Link
                         href={`/dashboard/courses/${course.id}`}
-                        className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold text-green-700 border border-green-200 hover:bg-green-50 transition-colors"
+                        className="inline-flex items-center px-4 py-2 rounded-lg text-xs font-semibold text-cocoa-800 border border-cocoa-300 hover:bg-cocoa-100 transition-all active:scale-[0.97]"
                       >
                         查看
                       </Link>
                     ) : isEnrolled ? (
                       <Link
                         href={`/dashboard/courses/${course.id}`}
-                        className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold text-white shadow-sm transition-all hover:opacity-90"
-                        style={{ background: 'linear-gradient(90deg, #3b82f6, #6366f1)' }}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-paper bg-cocoa-800 shadow-subtle transition-all hover:bg-cocoa-900 hover:-translate-y-0.5 active:scale-[0.97]"
                       >
-                        继续学习 →
+                        继续学习 <ArrowRight className="w-3.5 h-3.5" strokeWidth={2} />
                       </Link>
                     ) : (
                       <Link
                         href={`/dashboard/courses/${course.id}`}
-                        className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold text-indigo-600 border border-indigo-200 hover:bg-indigo-50 transition-colors"
+                        className="inline-flex items-center px-4 py-2 rounded-lg text-xs font-semibold text-cocoa-800 border border-cocoa-300 hover:bg-cocoa-100 transition-all active:scale-[0.97]"
                       >
                         查看详情
                       </Link>

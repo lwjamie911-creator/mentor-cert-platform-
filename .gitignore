@@ -7,3 +7,11 @@ prisma/dev.db-journal
 uploads/
 *.pdf
 .vercel
+.env.local.bak-prod
+.env*.bak*
+.env.production
+.env.vercel.local
+.env*.local
+.DS_Store
+**/.DS_Store
+prod-backups/

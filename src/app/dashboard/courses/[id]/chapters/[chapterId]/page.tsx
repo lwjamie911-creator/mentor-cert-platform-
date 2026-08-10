@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChapterContent } from './chapter-content'
+import { ArrowLeft, Check } from 'lucide-react'
 
 export default async function ChapterPage({
   params,
@@ -35,23 +36,25 @@ export default async function ChapterPage({
       <div>
         <Link
           href={`/dashboard/courses/${params.id}`}
-          className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-indigo-600 transition-colors mb-3"
+          className="inline-flex items-center gap-1 text-sm text-cocoa-500 hover:text-cocoa-800 transition-colors mb-3"
         >
-          ← 返回课程
+          <ArrowLeft className="w-4 h-4" strokeWidth={2} /> 返回课程
         </Link>
         <div className="flex items-center gap-2 flex-wrap">
-          <h1 className="text-xl font-bold text-gray-900">{chapter.title}</h1>
+          <h1 className="font-display text-xl font-bold text-cocoa-900">{chapter.title}</h1>
           {!chapter.isRequired && (
-            <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full">选学</span>
+            <span className="text-xs px-2 py-0.5 bg-cocoa-100 text-cocoa-500 rounded-full">选学</span>
           )}
           {progress?.status === 'completed' && (
-            <span className="text-xs px-2 py-0.5 bg-green-50 text-green-600 rounded-full font-medium">✓ 已完成</span>
+            <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full font-medium">
+              <Check className="w-3 h-3" strokeWidth={2.5} /> 已完成
+            </span>
           )}
         </div>
         {chapter.description && (
-          <p className="text-sm text-gray-400 mt-1">{chapter.description}</p>
+          <p className="text-sm text-cocoa-500 mt-1">{chapter.description}</p>
         )}
-        <p className="text-xs text-gray-400 mt-1 opacity-60">{chapter.course.title}</p>
+        <p className="text-xs text-cocoa-400 mt-1 opacity-80">{chapter.course.title}</p>
       </div>
 
       {/* 内容 + 操作 */}

@@ -2,43 +2,41 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Star, CalendarDays, TrendingUp, FolderKanban, Check, Sparkles, PartyPopper, type LucideIcon } from 'lucide-react'
+import type { AccentTheme } from './accent-theme'
 
-const CHECKS = [
+const CHECKS: { key: CheckKey; label: string; icon: LucideIcon; front: string; back: string; stamp: string }[] = [
   {
-    key: 'check1' as const,
+    key: 'check1',
     label: '职级要求',
-    icon: '⭐',
+    icon: Star,
     front: '职级要求',
     back: '专业职级 S9 及以上',
     stamp: '达标',
-    color: 'amber',
   },
   {
-    key: 'check2' as const,
+    key: 'check2',
     label: '司龄要求',
-    icon: '📅',
+    icon: CalendarDays,
     front: '司龄要求',
     back: '腾讯 TEG 办公室秘书岗位至少 2 年',
     stamp: '达标',
-    color: 'orange',
   },
   {
-    key: 'check3' as const,
+    key: 'check3',
     label: '绩效要求',
-    icon: '📈',
+    icon: TrendingUp,
     front: '绩效要求',
     back: '往期绩效至少 1 次 Outstanding',
     stamp: '达标',
-    color: 'rose',
   },
   {
-    key: 'check4' as const,
+    key: 'check4',
     label: '经验要求',
-    icon: '🗂️',
+    icon: FolderKanban,
     front: '经验要求',
     back: '至少独立负责过 1 次办公室虚拟小组、大型项目模块 PM 或项目 PM',
     stamp: '达标',
-    color: 'violet',
   },
 ]
 
@@ -47,9 +45,10 @@ type CheckKey = 'check1' | 'check2' | 'check3' | 'check4'
 interface Props {
   userId: string
   initialCheck: { check1: boolean; check2: boolean; check3: boolean; check4: boolean } | null
+  accent: AccentTheme
 }
 
-export function MentorSelfCheckPanel({ userId, initialCheck }: Props) {
+export function MentorSelfCheckPanel({ userId, initialCheck, accent }: Props) {
   const router = useRouter()
   const [checks, setChecks] = useState({
     check1: initialCheck?.check1 ?? false,
@@ -85,24 +84,16 @@ export function MentorSelfCheckPanel({ userId, initialCheck }: Props) {
     setStamping(null)
   }
 
-  const colorMap: Record<string, { border: string; bg: string; stampBorder: string; stampText: string; btn: string; badgeBg: string; badgeText: string }> = {
-    amber:  { border: 'border-amber-200',  bg: 'bg-amber-50',  stampBorder: 'border-amber-500',  stampText: 'text-amber-500',  btn: 'bg-amber-500 hover:bg-amber-600',   badgeBg: 'bg-amber-100',  badgeText: 'text-amber-700' },
-    orange: { border: 'border-orange-200', bg: 'bg-orange-50', stampBorder: 'border-orange-500', stampText: 'text-orange-500', btn: 'bg-orange-500 hover:bg-orange-600',  badgeBg: 'bg-orange-100', badgeText: 'text-orange-700' },
-    rose:   { border: 'border-rose-200',   bg: 'bg-rose-50',   stampBorder: 'border-rose-500',   stampText: 'text-rose-500',   btn: 'bg-rose-500 hover:bg-rose-600',     badgeBg: 'bg-rose-100',   badgeText: 'text-rose-700' },
-    violet: { border: 'border-violet-200', bg: 'bg-violet-50', stampBorder: 'border-violet-500', stampText: 'text-violet-500', btn: 'bg-violet-500 hover:bg-violet-600',  badgeBg: 'bg-violet-100', badgeText: 'text-violet-700' },
-  }
-
   return (
     <div>
-      <p className="text-sm text-gray-500 mb-1">点击卡片翻转查看资质标准 · 确认达标后点击按钮盖章</p>
-      <p className="text-xs text-gray-400 mb-5">已完成 {doneCount}/4 项</p>
+      <p className="text-sm text-cocoa-500 mb-1">点击卡片翻转查看资质标准 · 确认达标后点击按钮盖章</p>
+      <p className="text-xs text-cocoa-400 mb-5">已完成 {doneCount}/4 项</p>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
-        {CHECKS.map(({ key, icon, front, back, stamp, color }) => {
+        {CHECKS.map(({ key, icon: Icon, front, back, stamp }) => {
           const done = checks[key]
           // 已完成的卡片：默认显示背面，但仍可点击翻转查看正面
           const isFlipped = done ? (flipped[key] === false ? false : true) : !!flipped[key]
-          const c = colorMap[color]
 
           return (
             <div key={key} className="relative" style={{ perspective: '800px', height: '180px' }}>
@@ -117,47 +108,51 @@ export function MentorSelfCheckPanel({ userId, initialCheck }: Props) {
               >
                 {/* 正面 */}
                 <div
-                  className={`absolute inset-0 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 p-4
-                    ${done ? `${c.border} ${c.bg}` : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'}`}
+                  className={`absolute inset-0 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 p-4 transition-all
+                    ${done ? `${accent.softBorder} ${accent.softBg}` : `border-line bg-paper hover:shadow-card`}`}
                   style={{ backfaceVisibility: 'hidden' }}
                 >
-                  <span className="text-3xl">{icon}</span>
-                  <p className="font-semibold text-sm text-gray-800 text-center">{front}</p>
+                  <span className={`w-12 h-12 rounded-2xl flex items-center justify-center ${done ? accent.badge : accent.iconChip}`}>
+                    <Icon className="w-6 h-6" strokeWidth={2} />
+                  </span>
+                  <p className={`font-semibold text-sm text-center ${accent.text}`}>{front}</p>
                   {!done && (
-                    <p className="text-xs text-gray-400 mt-1">点击查看标准</p>
+                    <p className="text-xs text-cocoa-400 mt-1">点击查看标准</p>
                   )}
                   {done && (
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${c.badgeBg} ${c.badgeText}`}>✓ 已确认</span>
+                    <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${accent.badge}`}>
+                      <Check className="w-3 h-3" strokeWidth={2.5} /> 已确认
+                    </span>
                   )}
                 </div>
 
                 {/* 背面 */}
                 <div
                   className={`absolute inset-0 rounded-2xl border-2 flex flex-col items-start justify-between p-4
-                    ${done ? `${c.border} ${c.bg}` : 'border-gray-200 bg-gray-50'}`}
+                    ${done ? `${accent.softBorder} ${accent.softBg}` : `border-line ${accent.softBg}`}`}
                   style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
                 >
                   <div className="flex-1 flex items-center">
-                    <p className="text-sm text-gray-700 leading-relaxed font-medium">{back}</p>
+                    <p className={`text-sm leading-relaxed font-medium ${accent.text}`}>{back}</p>
                   </div>
 
                   {/* 已盖章显示印章，未盖章显示按钮 */}
                   {done ? (
                     <div className="w-full flex justify-end mt-2">
-                      <div className={`w-14 h-14 rounded-full border-[3px] ${c.stampBorder} flex flex-col items-center justify-center rotate-[-12deg] opacity-80`}
-                        style={{ boxShadow: `inset 0 0 0 1.5px` }}>
-                        <span className={`${c.stampText} font-bold text-sm leading-none`}>{stamp}</span>
-                        <span className={`${c.stampText} text-[9px] tracking-widest mt-0.5 opacity-70`}>✓</span>
+                      <div className={`w-14 h-14 rounded-full border-[3px] flex flex-col items-center justify-center rotate-[-12deg] opacity-80 ${accent.text}`}
+                        style={{ borderColor: 'currentColor', boxShadow: `inset 0 0 0 1.5px` }}>
+                        <span className="font-bold text-sm leading-none">{stamp}</span>
+                        <Check className="w-3 h-3 mt-0.5 opacity-70" strokeWidth={2.5} />
                       </div>
                     </div>
                   ) : (
                     <button
                       onClick={(e) => doStamp(e, key)}
                       disabled={!!stamping}
-                      className={`w-full mt-3 py-1.5 rounded-xl text-white text-xs font-semibold transition-all active:scale-95
-                        ${stamping === key ? 'opacity-60 cursor-wait' : `${c.btn} cursor-pointer`}`}
+                      className={`w-full mt-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 inline-flex items-center justify-center gap-1
+                        ${stamping === key ? `opacity-60 cursor-wait ${accent.btn}` : `${accent.btn} cursor-pointer`}`}
                     >
-                      {stamping === key ? '盖章中…' : '✦ 我已达标，确认盖章'}
+                      {stamping === key ? '盖章中…' : <><Sparkles className="w-3.5 h-3.5" strokeWidth={2} /> 我已达标，确认盖章</>}
                     </button>
                   )}
                 </div>
@@ -168,8 +163,10 @@ export function MentorSelfCheckPanel({ userId, initialCheck }: Props) {
       </div>
 
       {allDone && (
-        <div className="p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl text-center">
-          <span className="text-amber-700 font-semibold text-sm">🎉 四项资质已全部确认，学习课程已解锁！</span>
+        <div className={`p-4 ${accent.softBg} border ${accent.softBorder} rounded-lg text-center`}>
+          <span className={`inline-flex items-center gap-1.5 font-semibold text-sm ${accent.text}`}>
+            <PartyPopper className="w-4 h-4" strokeWidth={2} /> 四项资质已全部确认，学习课程已解锁！
+          </span>
         </div>
       )}
     </div>

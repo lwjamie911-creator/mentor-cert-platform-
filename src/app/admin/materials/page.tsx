@@ -15,19 +15,19 @@ export default async function AdminMaterialsPage() {
     <div className="space-y-6">
       {/* 页面标题 */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">学习文档管理</h1>
-        <p className="text-sm text-gray-400 mt-1">管理导师和新人专区的学习资料，支持 Markdown 格式正文</p>
+        <h1 className="font-display text-2xl text-cocoa-900">学习文档管理</h1>
+        <p className="text-sm text-cocoa-500 mt-1">管理导师和新人专区的学习资料，支持 Markdown 格式正文</p>
       </div>
 
       {/* 统计卡片 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: '全部资料', value: materials.length,   color: 'bg-indigo-50 text-indigo-700' },
-          { label: '已发布',   value: publishedCount,     color: 'bg-green-50 text-green-700'  },
-          { label: '导师专区', value: mentorCount,        color: 'bg-amber-50 text-amber-700'  },
-          { label: '新人专区', value: newbieCount,        color: 'bg-blue-50 text-blue-700'    },
+          { label: '全部资料', value: materials.length,   color: 'bg-cocoa-50 text-cocoa-700 border-cocoa-100'   },
+          { label: '已发布',   value: publishedCount,     color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
+          { label: '导师专区', value: mentorCount,        color: 'bg-cocoa-100 text-cocoa-800 border-cocoa-200'  },
+          { label: '新人专区', value: newbieCount,        color: 'bg-petal-100 text-petal-800 border-petal-200'  },
         ].map(s => (
-          <div key={s.label} className={`rounded-xl px-4 py-3 ${s.color}`}>
+          <div key={s.label} className={`rounded-2xl px-4 py-3 border ${s.color}`}>
             <div className="text-2xl font-black">{s.value}</div>
             <div className="text-xs mt-0.5 opacity-80">{s.label}</div>
           </div>

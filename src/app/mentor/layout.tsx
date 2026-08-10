@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { ArrowLeft, GraduationCap } from 'lucide-react'
 import { SignOutButton } from '@/components/sign-out-button'
 
 export default async function MentorLayout({ children }: { children: React.ReactNode }) {
@@ -11,32 +12,34 @@ export default async function MentorLayout({ children }: { children: React.React
   if (!session) redirect('/login')
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#fffdf5' }}>
+    <div className="min-h-screen flex flex-col bg-fog">
       {/* 顶部导航 */}
-      <header className="bg-white/80 backdrop-blur sticky top-0 z-10 border-b border-amber-100">
-        <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
+      <header className="bg-paper/80 backdrop-blur sticky top-0 z-10 border-b border-line">
+        <div className="max-w-6xl mx-auto px-6 lg:px-10 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/zone"
-              className="flex items-center gap-1 text-gray-400 hover:text-gray-600 text-sm transition-colors">
-              <span>←</span>
+              className="flex items-center gap-1.5 text-slate hover:text-cocoa-800 text-sm transition-colors">
+              <ArrowLeft className="w-4 h-4" strokeWidth={2} />
               <span className="hidden sm:inline">返回首页</span>
             </Link>
-            <span className="text-gray-200">|</span>
+            <span className="text-line">|</span>
             <div className="flex items-center gap-2">
-              <span className="text-lg">🎓</span>
-              <span className="font-bold text-gray-900 text-sm">导师专区</span>
+              <span className="w-7 h-7 rounded-lg bg-cocoa-800 flex items-center justify-center flex-shrink-0">
+                <GraduationCap className="w-4 h-4 text-blush" strokeWidth={2} />
+              </span>
+              <span className="font-semibold text-cocoa-900 text-sm">导师专区</span>
             </div>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Link
               href="/dashboard/profile"
-              className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl hover:bg-amber-50 transition-colors"
+              className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-cocoa-100 transition-colors"
               title="个人设置 / 修改密码"
             >
-              <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-xs">
+              <div className="w-6 h-6 rounded-full bg-cocoa-200 flex items-center justify-center text-cocoa-800 font-bold text-xs">
                 {session.user.name?.[0]?.toUpperCase() ?? '?'}
               </div>
-              <span className="text-gray-500 hidden sm:block">{session.user.name}</span>
+              <span className="text-slate hidden sm:block">{session.user.name}</span>
             </Link>
             <SignOutButton />
           </div>
@@ -44,10 +47,10 @@ export default async function MentorLayout({ children }: { children: React.React
       </header>
 
       {/* 顶部专区色条 */}
-      <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #f59e0b, #fb923c)' }} />
+      <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #5d2a1a, #9a5c44, #cf9c84)' }} />
 
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8">{children}</main>
-      <footer className="text-center text-xs text-gray-300 py-5">TEG办公室内务小组出品</footer>
+      <main className="flex-1 max-w-6xl w-full mx-auto px-6 lg:px-10 py-10">{children}</main>
+      <footer className="text-center text-xs text-cocoa-400 py-5">TEG办公室内务小组出品</footer>
     </div>
   )
 }

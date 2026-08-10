@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { Download, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export function BackupButton() {
   const [loading, setLoading] = useState(false)
@@ -25,13 +27,14 @@ export function BackupButton() {
   }
 
   return (
-    <button
+    <Button
+      variant="ghost"
       onClick={handleBackup}
       disabled={loading}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-500 border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50"
     >
-      <span>{loading ? '⏳' : '💾'}</span>
-      {loading ? '导出中…' : '导出数据备份'}
-    </button>
+      {loading
+        ? <><Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} /> 导出中…</>
+        : <><Download className="w-4 h-4" strokeWidth={2} /> 导出数据备份</>}
+    </Button>
   )
 }

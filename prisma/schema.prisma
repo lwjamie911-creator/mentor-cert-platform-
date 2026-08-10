@@ -30,6 +30,8 @@ model User {
   // 新人专区
   newbieChecklist   NewbieChecklist?
   newbieExam        NewbieExam?
+  newbieGoalReview  NewbieGoalReview?
+  newbieReview      NewbieReview?
   mentorPairAs      MentorNewbiePair[]  @relation("MentorPairs")
   newbiePairAs      MentorNewbiePair?   @relation("NewbiePairs")
 
@@ -276,6 +278,54 @@ model NewbieBadge {
   issuedAt  DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// 新人目标复盘（工作目标 + 前3个月月报，均为腾讯文档链接）
+// ─────────────────────────────────────────────
+model NewbieGoalReview {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  workGoalUrl  String?                 // 试用期工作目标文档链接
+  month1Url    String?                 // 第1个月月报
+  month2Url    String?                 // 第2个月月报
+  month3Url    String?                 // 第3个月月报
+  workGoalFeedback String?             // 导师对工作目标的评语
+  month1Feedback   String?             // 导师对第1个月月报的评语
+  month2Feedback   String?             // 导师对第2个月月报的评语
+  month3Feedback   String?             // 导师对第3个月月报的评语
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// 新人班会感言（心得文本 + 多张照片）
+// ─────────────────────────────────────────────
+model NewbieReview {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  text       String?                   // 不限字数心得
+  photosJson String?                   // base64 图片数组的 JSON 字符串
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// 班会预告（全站单例，管理员编辑，id 固定为 "singleton"）
+// ─────────────────────────────────────────────
+model ClassMeeting {
+  id           String   @id @default("singleton")
+  title        String
+  timeText     String                  // 时间（纯文本）
+  location     String
+  description  String?                 // 文案
+  posterBase64 String?                 // 海报图
+  isPublished  Boolean  @default(true)
+  updatedAt    DateTime @updatedAt
 }
 
 // ─────────────────────────────────────────────

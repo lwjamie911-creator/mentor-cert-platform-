@@ -4,6 +4,7 @@ import Link from 'next/link'
 import CourseForm from '@/components/course-form'
 import { ChapterList } from './chapter-list'
 import { QuestionBank } from './question-bank'
+import { ArrowLeft, FileText, BookOpen, HelpCircle, type LucideIcon } from 'lucide-react'
 
 export default async function AdminCourseDetailPage({ params }: { params: { id: string } }) {
   const course = await prisma.course.findUnique({
@@ -24,23 +25,23 @@ export default async function AdminCourseDetailPage({ params }: { params: { id: 
       {/* 返回 + 页头 */}
       <div>
         <Link href="/admin/courses"
-          className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-indigo-600 transition-colors mb-3">
-          ← 返回课程列表
+          className="inline-flex items-center gap-1 text-sm text-cocoa-500 hover:text-cocoa-800 transition-colors mb-3">
+          <ArrowLeft className="w-4 h-4" strokeWidth={2} /> 返回课程列表
         </Link>
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-gray-900">编辑课程</h1>
+          <h1 className="font-display text-2xl text-cocoa-900">编辑课程</h1>
           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
-            course.isPublished ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'
+            course.isPublished ? 'bg-green-50 text-green-700' : 'bg-cocoa-100 text-cocoa-500'
           }`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${course.isPublished ? 'bg-green-500' : 'bg-gray-400'}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${course.isPublished ? 'bg-green-500' : 'bg-cocoa-400'}`} />
             {course.isPublished ? '已上线' : '草稿'}
           </span>
         </div>
-        <p className="text-sm text-gray-400 mt-1">{course.title}</p>
+        <p className="text-sm text-cocoa-500 mt-1">{course.title}</p>
       </div>
 
       {/* 基本信息 */}
-      <SectionCard icon="📝" title="基本信息" accentColor="indigo">
+      <SectionCard icon={FileText} title="基本信息">
         <CourseForm
           initialData={{
             id: course.id,
@@ -55,9 +56,8 @@ export default async function AdminCourseDetailPage({ params }: { params: { id: 
 
       {/* 章节管理 */}
       <SectionCard
-        icon="📖"
+        icon={BookOpen}
         title="章节管理"
-        accentColor="blue"
         badge={`${course.chapters.length} 个章节`}
       >
         <ChapterList courseId={course.id} chapters={course.chapters} />
@@ -65,9 +65,8 @@ export default async function AdminCourseDetailPage({ params }: { params: { id: 
 
       {/* 期末考题 */}
       <SectionCard
-        icon="❓"
+        icon={HelpCircle}
         title="期末考题"
-        accentColor="purple"
         badge={`${finalQuestions.length} 道题`}
       >
         <QuestionBank courseId={course.id} questions={finalQuestions} scope="course" />
@@ -76,37 +75,22 @@ export default async function AdminCourseDetailPage({ params }: { params: { id: 
   )
 }
 
-function SectionCard({ icon, title, accentColor, badge, children }: {
-  icon: string
+function SectionCard({ icon: Icon, title, badge, children }: {
+  icon: LucideIcon
   title: string
-  accentColor: 'indigo' | 'blue' | 'purple'
   badge?: string
   children: React.ReactNode
 }) {
-  const gradients = {
-    indigo:  'from-indigo-50 to-purple-50',
-    blue:    'from-blue-50 to-indigo-50',
-    purple:  'from-purple-50 to-pink-50',
-  }
-  const textColors = {
-    indigo: 'text-indigo-800',
-    blue:   'text-blue-800',
-    purple: 'text-purple-800',
-  }
-  const badgeColors = {
-    indigo: 'bg-indigo-100 text-indigo-600',
-    blue:   'bg-blue-100 text-blue-600',
-    purple: 'bg-purple-100 text-purple-600',
-  }
   return (
-    <section className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className={`flex items-center justify-between px-5 py-4 border-b border-gray-50 bg-gradient-to-r ${gradients[accentColor]}`}>
+    <section className="bg-paper rounded-2xl border border-line shadow-card overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-line/70"
+        style={{ background: 'linear-gradient(135deg, #fdf4ec, #fbe6d6)' }}>
         <div className="flex items-center gap-2">
-          <span>{icon}</span>
-          <h2 className={`font-bold text-sm ${textColors[accentColor]}`}>{title}</h2>
+          <Icon className="w-4 h-4 text-cocoa-800" strokeWidth={2} />
+          <h2 className="font-semibold text-sm text-cocoa-900">{title}</h2>
         </div>
         {badge && (
-          <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${badgeColors[accentColor]}`}>{badge}</span>
+          <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-cocoa-100 text-cocoa-700">{badge}</span>
         )}
       </div>
       <div className="p-5">{children}</div>

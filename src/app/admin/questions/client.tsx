@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { Download, Upload, Info, GraduationCap, Sprout } from 'lucide-react'
 
 const typeLabel: Record<string, string> = {
   matching:  '连线题',
@@ -10,10 +11,10 @@ const typeLabel: Record<string, string> = {
   truefalse: '判断题',
 }
 const typeColor: Record<string, string> = {
-  matching:  'bg-yellow-100 text-yellow-700',
-  multiple:  'bg-green-100 text-green-700',
-  single:    'bg-blue-100 text-blue-700',
-  truefalse: 'bg-pink-100 text-pink-700',
+  matching:  'bg-blush/60 text-sienna',
+  multiple:  'bg-emerald-50 text-emerald-700',
+  single:    'bg-cocoa-100 text-cocoa-700',
+  truefalse: 'bg-petal-100 text-petal-700',
 }
 
 interface Counts { matching: number; multiple: number; single: number; truefalse: number; total: number }
@@ -37,8 +38,8 @@ function ZoneBankPanel({
 
   const isMentor = zone === 'mentor'
   const label = isMentor ? '导师认证' : '新人专区'
-  const accentFrom = isMentor ? '#4f46e5' : '#3b82f6'
-  const accentTo   = isMentor ? '#7c3aed' : '#6366f1'
+  const accentFrom = isMentor ? '#5d2a1a' : '#c05e6d'
+  const accentTo   = isMentor ? '#7a4230' : '#d67d8a'
   const ruleText = isMentor
     ? '每次随机抽取 10 题：必含 1 道连线题 + 1 道多选题 + 8 道单选/判断题'
     : '每次随机抽取 10 题：必含 1 道连线题 + 1 道多选题 + 8 道单选/判断题'
@@ -92,21 +93,21 @@ function ZoneBankPanel({
       {/* 操作栏 */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-gray-400 mt-1">管理{label}考试题库，支持下载 Excel 后修改再上传更新</p>
+          <p className="text-sm text-cocoa-500 mt-1">管理{label}考试题库，支持下载 Excel 后修改再上传更新</p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={handleDownload}
             disabled={downloading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-cocoa-700 border border-cocoa-300 bg-paper hover:bg-cocoa-50 hover:border-cocoa-500 transition-all active:scale-[0.97] disabled:opacity-50"
           >
-            {downloading ? '⏳' : '📥'} {downloading ? '导出中…' : '下载题库 Excel'}
+            <Download className="w-4 h-4" strokeWidth={2} /> {downloading ? '导出中…' : '下载题库 Excel'}
           </button>
-          <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white cursor-pointer transition-all
-            ${uploading ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'}`}
+          <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white cursor-pointer transition-all active:scale-[0.97]
+            ${uploading ? 'opacity-50 cursor-not-allowed' : 'hover:-translate-y-0.5 hover:shadow-subtle'}`}
             style={{ background: `linear-gradient(90deg, ${accentFrom}, ${accentTo})` }}
           >
-            {uploading ? '⏳ 上传中…' : '📤 上传更新题库'}
+            <Upload className="w-4 h-4" strokeWidth={2} /> {uploading ? '上传中…' : '上传更新题库'}
             <input
               ref={fileRef}
               type="file"
@@ -123,7 +124,7 @@ function ZoneBankPanel({
       {uploadResult && (
         <div className={`rounded-xl px-5 py-4 text-sm border ${
           uploadResult.success
-            ? 'bg-green-50 border-green-200 text-green-800'
+            ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
             : 'bg-red-50 border-red-200 text-red-800'
         }`}>
           <p className="font-semibold">{uploadResult.success ?? uploadResult.error}</p>
@@ -138,13 +139,13 @@ function ZoneBankPanel({
       {/* 题库统计卡片 */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {[
-          { label: '题目总数', value: counts.total,     color: 'bg-indigo-50 text-indigo-700' },
-          { label: '连线题',   value: counts.matching,  color: 'bg-yellow-50 text-yellow-700' },
-          { label: '多选题',   value: counts.multiple,  color: 'bg-green-50 text-green-700'   },
-          { label: '单选题',   value: counts.single,    color: 'bg-blue-50 text-blue-700'     },
-          { label: '判断题',   value: counts.truefalse, color: 'bg-pink-50 text-pink-700'     },
+          { label: '题目总数', value: counts.total,     color: 'bg-cocoa-50 text-cocoa-700 border-cocoa-100'   },
+          { label: '连线题',   value: counts.matching,  color: 'bg-blush/50 text-sienna border-cocoa-200'      },
+          { label: '多选题',   value: counts.multiple,  color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
+          { label: '单选题',   value: counts.single,    color: 'bg-cocoa-100 text-cocoa-800 border-cocoa-200'  },
+          { label: '判断题',   value: counts.truefalse, color: 'bg-petal-100 text-petal-800 border-petal-200'  },
         ].map(c => (
-          <div key={c.label} className={`rounded-xl p-4 ${c.color}`}>
+          <div key={c.label} className={`rounded-2xl p-4 border ${c.color}`}>
             <div className="text-3xl font-black">{c.value}</div>
             <div className="text-xs mt-0.5 opacity-80">{c.label}</div>
           </div>
@@ -152,8 +153,8 @@ function ZoneBankPanel({
       </div>
 
       {/* 考试规则说明 */}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 text-sm text-amber-800 flex items-start gap-3">
-        <span className="text-lg mt-0.5">ℹ️</span>
+      <div className="bg-blush/40 border border-cocoa-200 rounded-xl px-5 py-4 text-sm text-sienna flex items-start gap-3">
+        <Info className="w-5 h-5 mt-0.5 flex-shrink-0 text-cocoa-600" strokeWidth={2} />
         <div>
           <p className="font-semibold mb-1">当前考试规则</p>
           <p>{ruleText}</p>
@@ -162,25 +163,25 @@ function ZoneBankPanel({
       </div>
 
       {/* 题目预览列表 */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between"
-          style={{ background: 'linear-gradient(135deg, #f8f7ff, #ede9fe)' }}>
-          <h2 className="font-bold text-indigo-800 text-sm">题目列表（共 {preview.length} 题）</h2>
+      <div className="bg-paper rounded-2xl border border-line shadow-card overflow-hidden">
+        <div className="px-5 py-4 border-b border-line/70 flex items-center justify-between"
+          style={{ background: isMentor ? 'linear-gradient(135deg, #fdf4ec, #fbe6d6)' : 'linear-gradient(135deg, #fef6f7, #fce4e6)' }}>
+          <h2 className={`font-semibold text-sm ${isMentor ? 'text-cocoa-900' : 'text-petal-900'}`}>题目列表（共 {preview.length} 题）</h2>
         </div>
-        <div className="divide-y divide-gray-50">
+        <div className="divide-y divide-line/70">
           {preview.length === 0 ? (
-            <div className="px-5 py-10 text-center text-gray-400 text-sm">暂无题目，请上传题库</div>
+            <div className="px-5 py-10 text-center text-cocoa-400 text-sm">暂无题目，请上传题库</div>
           ) : (
             preview.map((q, i) => (
               <div key={q.id} className="px-5 py-3.5 flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center font-bold mt-0.5">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-cocoa-100 text-cocoa-500 text-xs flex items-center justify-center font-bold mt-0.5">
                   {i + 1}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-800 leading-relaxed line-clamp-2">{q.content}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{q.optCount} 个选项</p>
+                  <p className="text-sm text-cocoa-800 leading-relaxed line-clamp-2">{q.content}</p>
+                  <p className="text-xs text-cocoa-400 mt-0.5">{q.optCount} 个选项</p>
                 </div>
-                <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${typeColor[q.type] ?? 'bg-gray-100 text-gray-500'}`}>
+                <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${typeColor[q.type] ?? 'bg-cocoa-50 text-cocoa-500'}`}>
                   {typeLabel[q.type] ?? q.type}
                 </span>
               </div>
@@ -205,31 +206,31 @@ export function QuestionBankClient({
     <div className="space-y-6">
       {/* 页头 */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">题库管理</h1>
-        <p className="text-sm text-gray-400 mt-1">管理各专区考试题库，支持下载 Excel 后修改再上传更新</p>
+        <h1 className="font-display text-2xl text-cocoa-900">题库管理</h1>
+        <p className="text-sm text-cocoa-500 mt-1">管理各专区考试题库，支持下载 Excel 后修改再上传更新</p>
       </div>
 
       {/* 标签页 */}
-      <div className="flex gap-2 border-b border-gray-200 pb-0">
+      <div className="flex gap-2 border-b border-line pb-0">
         <button
           onClick={() => setTab('mentor')}
-          className={`px-4 py-2 text-sm font-semibold transition-colors -mb-px ${
+          className={`inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold transition-colors -mb-px ${
             tab === 'mentor'
-              ? 'text-amber-700 border-b-2 border-amber-500 bg-white'
-              : 'text-gray-400 hover:text-gray-600'
+              ? 'text-cocoa-800 border-b-2 border-cocoa-700 bg-paper'
+              : 'text-cocoa-400 hover:text-cocoa-600'
           }`}
         >
-          🎓 导师题库
+          <GraduationCap className="w-4 h-4" strokeWidth={2} /> 导师题库
         </button>
         <button
           onClick={() => setTab('newbie')}
-          className={`px-4 py-2 text-sm font-semibold transition-colors -mb-px ${
+          className={`inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold transition-colors -mb-px ${
             tab === 'newbie'
-              ? 'text-blue-700 border-b-2 border-blue-500 bg-white'
-              : 'text-gray-400 hover:text-gray-600'
+              ? 'text-petal-800 border-b-2 border-petal-600 bg-paper'
+              : 'text-cocoa-400 hover:text-cocoa-600'
           }`}
         >
-          🌱 新人题库
+          <Sprout className="w-4 h-4" strokeWidth={2} /> 新人题库
         </button>
       </div>
 

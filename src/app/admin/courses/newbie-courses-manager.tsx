@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { Plus, X, Link2, FileText, FileType, BookOpen } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface Material {
   id: string
@@ -114,55 +116,53 @@ export function NewbieCoursesManager({ initialMaterials }: { initialMaterials: M
     <div className="space-y-4">
       {/* 操作栏 */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">共 {materials.length} 门课程</p>
-        <button
-          onClick={openCreate}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white shadow-sm hover:opacity-90 transition-all"
-          style={{ background: 'linear-gradient(90deg,#3b82f6,#6366f1)' }}
-        >
-          + 新增课程
-        </button>
+        <p className="text-sm text-cocoa-600">共 {materials.length} 门课程</p>
+        <Button onClick={openCreate} size="sm">
+          <Plus className="w-4 h-4" strokeWidth={2} /> 新增课程
+        </Button>
       </div>
 
       {/* 新增 / 编辑表单 */}
       {showForm && (
-        <div className="rounded-2xl border border-blue-100 bg-white shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between"
-            style={{ background: 'linear-gradient(135deg,#eff6ff,#dbeafe)' }}>
-            <h3 className="font-bold text-blue-800">{creating ? '新增新人课程' : '编辑课程'}</h3>
-            <button onClick={closeForm} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
+        <div className="rounded-2xl border border-cocoa-200 bg-paper shadow-card overflow-hidden animate-scale-in">
+          <div className="px-6 py-4 border-b border-line/70 flex items-center justify-between"
+            style={{ background: 'linear-gradient(135deg,#fdf4ec,#f5d9c4)' }}>
+            <h3 className="font-semibold text-cocoa-900">{creating ? '新增新人课程' : '编辑课程'}</h3>
+            <button onClick={closeForm} className="text-cocoa-400 hover:text-cocoa-700 transition-colors">
+              <X className="w-5 h-5" strokeWidth={2} />
+            </button>
           </div>
           <div className="px-6 py-5 space-y-4">
             {/* 标题 + 科目 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">课程标题 *</label>
+                <label className="block text-xs font-medium text-cocoa-600 mb-1">课程标题 *</label>
                 <input
                   value={form.title}
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                   placeholder="例：TEG新人必读白皮书"
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
+                  className="w-full px-3 py-2 text-sm border border-cocoa-300 rounded-lg bg-cocoa-50/50 text-cocoa-900 placeholder:text-cocoa-400 focus:outline-none focus:ring-2 focus:ring-cocoa-600/15 focus:border-cocoa-600 transition-all"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">科目标签</label>
+                <label className="block text-xs font-medium text-cocoa-600 mb-1">科目标签</label>
                 <input
                   value={form.subject}
                   onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
                   placeholder="例：新人必读 / 入职指南"
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400"
+                  className="w-full px-3 py-2 text-sm border border-cocoa-300 rounded-lg bg-cocoa-50/50 text-cocoa-900 placeholder:text-cocoa-400 focus:outline-none focus:ring-2 focus:ring-cocoa-600/15 focus:border-cocoa-600 transition-all"
                 />
               </div>
             </div>
 
             {/* 内容类型 + URL */}
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">内容类型</label>
+              <label className="block text-xs font-medium text-cocoa-600 mb-1">内容类型</label>
               <div className="flex gap-3 mb-3">
                 {[
-                  { value: 'external_link', label: '🔗 外部链接' },
-                  { value: 'pdf',           label: '📄 PDF 文件' },
-                  { value: 'text',          label: '📝 内嵌文本' },
+                  { value: 'external_link', label: '外部链接', icon: Link2 },
+                  { value: 'pdf',           label: 'PDF 文件', icon: FileType },
+                  { value: 'text',          label: '内嵌文本', icon: FileText },
                 ].map(opt => (
                   <label key={opt.value} className="flex items-center gap-1.5 cursor-pointer">
                     <input
@@ -171,36 +171,38 @@ export function NewbieCoursesManager({ initialMaterials }: { initialMaterials: M
                       value={opt.value}
                       checked={form.contentType === opt.value}
                       onChange={() => setForm(f => ({ ...f, contentType: opt.value }))}
-                      className="accent-blue-500"
+                      className="accent-cocoa-700"
                     />
-                    <span className="text-sm text-gray-700">{opt.label}</span>
+                    <span className="flex items-center gap-1 text-sm text-cocoa-700">
+                      <opt.icon className="w-3.5 h-3.5" strokeWidth={2} /> {opt.label}
+                    </span>
                   </label>
                 ))}
               </div>
 
               {form.contentType !== 'text' && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                  <label className="block text-xs font-medium text-cocoa-600 mb-1">
                     {form.contentType === 'pdf' ? 'PDF 路径（/materials/xxx.pdf）' : '外部链接 URL'}
                   </label>
                   <input
                     value={form.contentUrl ?? ''}
                     onChange={e => setForm(f => ({ ...f, contentUrl: e.target.value }))}
                     placeholder={form.contentType === 'pdf' ? '/materials/filename.pdf' : 'https://...'}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 font-mono"
+                    className="w-full px-3 py-2 text-sm border border-cocoa-300 rounded-lg bg-cocoa-50/50 text-cocoa-900 placeholder:text-cocoa-400 focus:outline-none focus:ring-2 focus:ring-cocoa-600/15 focus:border-cocoa-600 font-mono transition-all"
                   />
                 </div>
               )}
 
               {form.contentType === 'text' && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">正文内容（Markdown）</label>
+                  <label className="block text-xs font-medium text-cocoa-600 mb-1">正文内容（Markdown）</label>
                   <textarea
                     value={form.contentText ?? ''}
                     onChange={e => setForm(f => ({ ...f, contentText: e.target.value }))}
                     rows={8}
                     placeholder="支持 Markdown 格式：**粗体**、# 标题、- 列表……"
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300 font-mono leading-relaxed resize-y"
+                    className="w-full px-3 py-2 text-sm border border-cocoa-300 rounded-lg bg-cocoa-50/50 text-cocoa-900 placeholder:text-cocoa-400 focus:outline-none focus:ring-2 focus:ring-cocoa-600/15 font-mono leading-relaxed resize-y transition-all"
                   />
                 </div>
               )}
@@ -209,23 +211,23 @@ export function NewbieCoursesManager({ initialMaterials }: { initialMaterials: M
             {/* 最短阅读时间 + 排序 */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">最短阅读时间（秒）</label>
+                <label className="block text-xs font-medium text-cocoa-600 mb-1">最短阅读时间（秒）</label>
                 <input
                   type="number"
                   min={0}
                   value={form.minReadSeconds}
                   onChange={e => setForm(f => ({ ...f, minReadSeconds: Number(e.target.value) }))}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="w-full px-3 py-2 text-sm border border-cocoa-300 rounded-lg bg-cocoa-50/50 text-cocoa-900 focus:outline-none focus:ring-2 focus:ring-cocoa-600/15 focus:border-cocoa-600 transition-all"
                 />
-                <p className="text-xs text-gray-400 mt-0.5">0 = 无限制</p>
+                <p className="text-xs text-cocoa-400 mt-0.5">0 = 无限制</p>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">排序（数字越小越靠前）</label>
+                <label className="block text-xs font-medium text-cocoa-600 mb-1">排序（数字越小越靠前）</label>
                 <input
                   type="number"
                   value={form.orderIndex}
                   onChange={e => setForm(f => ({ ...f, orderIndex: Number(e.target.value) }))}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="w-full px-3 py-2 text-sm border border-cocoa-300 rounded-lg bg-cocoa-50/50 text-cocoa-900 focus:outline-none focus:ring-2 focus:ring-cocoa-600/15 focus:border-cocoa-600 transition-all"
                 />
               </div>
             </div>
@@ -235,22 +237,17 @@ export function NewbieCoursesManager({ initialMaterials }: { initialMaterials: M
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <div
                   onClick={() => setForm(f => ({ ...f, isPublished: !f.isPublished }))}
-                  className={`relative w-10 h-6 rounded-full transition-colors cursor-pointer ${form.isPublished ? 'bg-green-400' : 'bg-gray-200'}`}
+                  className={`relative w-10 h-6 rounded-full transition-colors cursor-pointer ${form.isPublished ? 'bg-green-400' : 'bg-cocoa-200'}`}
                 >
                   <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${form.isPublished ? 'left-5' : 'left-1'}`} />
                 </div>
-                <span className="text-sm text-gray-600">{form.isPublished ? '已发布（学员可见）' : '草稿（学员不可见）'}</span>
+                <span className="text-sm text-cocoa-600">{form.isPublished ? '已发布（学员可见）' : '草稿（学员不可见）'}</span>
               </label>
               <div className="flex items-center gap-2">
-                <button onClick={closeForm} className="px-4 py-2 text-sm text-gray-500 hover:bg-gray-100 rounded-xl transition-colors">取消</button>
-                <button
-                  onClick={handleSave}
-                  disabled={saving || !form.title.trim()}
-                  className="px-5 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-all shadow-sm"
-                  style={{ background: 'linear-gradient(90deg,#3b82f6,#6366f1)' }}
-                >
+                <Button variant="ghost" size="sm" onClick={closeForm}>取消</Button>
+                <Button size="sm" onClick={handleSave} disabled={saving || !form.title.trim()}>
                   {saving ? '保存中…' : '保存'}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -259,8 +256,8 @@ export function NewbieCoursesManager({ initialMaterials }: { initialMaterials: M
 
       {/* 课程列表 */}
       {sorted.length === 0 ? (
-        <div className="text-center py-16 text-gray-300 bg-white rounded-2xl border border-gray-100">
-          <div className="text-4xl mb-3">📚</div>
+        <div className="text-center py-16 text-cocoa-400 bg-paper rounded-2xl border border-line">
+          <BookOpen className="w-10 h-10 mx-auto mb-3 text-cocoa-300" strokeWidth={1.5} />
           <p className="text-sm">暂无新人课程，点击右上角新增</p>
         </div>
       ) : (
@@ -269,34 +266,34 @@ export function NewbieCoursesManager({ initialMaterials }: { initialMaterials: M
             const minMin = m.minReadSeconds > 0 ? Math.ceil(m.minReadSeconds / 60) : null
             return (
               <div key={m.id}
-                className="bg-white rounded-xl border border-gray-100 px-5 py-4 flex items-start gap-4 hover:border-blue-200 transition-colors group">
+                className="bg-paper rounded-xl border border-line px-5 py-4 flex items-start gap-4 hover:border-cocoa-300 transition-colors group">
                 {/* 序号 */}
-                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-400 font-bold text-sm flex-shrink-0 mt-0.5">
+                <div className="w-8 h-8 rounded-full bg-cocoa-100 flex items-center justify-center text-cocoa-600 font-bold text-sm flex-shrink-0 mt-0.5">
                   {i + 1}
                 </div>
 
                 {/* 主体 */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <p className="text-sm font-semibold text-gray-800">{m.title}</p>
+                    <p className="text-sm font-semibold text-cocoa-800">{m.title}</p>
                     {!m.isPublished && (
-                      <span className="text-xs bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full">草稿</span>
+                      <span className="text-xs bg-cocoa-100 text-cocoa-500 px-2 py-0.5 rounded-full">草稿</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap text-xs text-gray-400">
-                    {m.subject && <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-medium">{m.subject}</span>}
-                    <span className={`px-2 py-0.5 rounded-full ${
-                      m.contentType === 'pdf' ? 'bg-red-50 text-red-500' :
-                      m.contentType === 'external_link' ? 'bg-blue-50 text-blue-500' :
-                      'bg-gray-100 text-gray-500'
-                    }`}>
-                      {m.contentType === 'pdf' ? '📄 PDF' : m.contentType === 'external_link' ? '🔗 外链' : '📝 文本'}
+                  <div className="flex items-center gap-2 flex-wrap text-xs text-cocoa-500">
+                    {m.subject && <span className="bg-cocoa-100 text-cocoa-700 px-2 py-0.5 rounded-full font-medium">{m.subject}</span>}
+                    <span className="bg-cocoa-50 text-cocoa-600 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                      {m.contentType === 'pdf'
+                        ? <><FileType className="w-3 h-3" strokeWidth={2} /> PDF</>
+                        : m.contentType === 'external_link'
+                        ? <><Link2 className="w-3 h-3" strokeWidth={2} /> 外链</>
+                        : <><FileText className="w-3 h-3" strokeWidth={2} /> 文本</>}
                     </span>
                     {minMin && <span>约 {minMin} 分钟</span>}
                     {m._count && <span>{m._count.progress} 人已完成</span>}
                     {m.contentUrl && (
                       <a href={m.contentUrl} target="_blank" rel="noopener noreferrer"
-                        className="text-blue-400 hover:underline truncate max-w-[200px]">
+                        className="text-cocoa-500 hover:text-cocoa-800 hover:underline truncate max-w-[200px]">
                         {m.contentUrl}
                       </a>
                     )}
@@ -308,14 +305,14 @@ export function NewbieCoursesManager({ initialMaterials }: { initialMaterials: M
                   <button
                     onClick={() => togglePublish(m)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                      m.isPublished ? 'text-gray-500 hover:bg-gray-100' : 'text-green-600 hover:bg-green-50'
+                      m.isPublished ? 'text-cocoa-500 hover:bg-cocoa-100' : 'text-green-600 hover:bg-green-50'
                     }`}
                   >
                     {m.isPublished ? '下架' : '发布'}
                   </button>
                   <button
                     onClick={() => openEdit(m)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-cocoa-700 hover:bg-cocoa-100 transition-colors"
                   >
                     编辑
                   </button>

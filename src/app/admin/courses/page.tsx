@@ -35,8 +35,8 @@ export default async function AdminCoursesPage() {
     <div className="space-y-6">
       {/* 页头 */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">课程管理</h1>
-        <p className="text-sm text-gray-400 mt-1">管理各专区的学习课程</p>
+        <h1 className="font-display text-2xl text-cocoa-900">课程管理</h1>
+        <p className="text-sm text-cocoa-500 mt-1">管理各专区的学习课程</p>
       </div>
 
       <CoursesTabClient

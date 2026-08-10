@@ -2,169 +2,80 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Sprout } from 'lucide-react'
 import { SignOutButton } from '@/components/sign-out-button'
+import { ZoneCards } from './zone-cards'
 
 export default async function ZonePage() {
   const session = await getServerSession(authOptions)
   if (!session) redirect('/login')
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(160deg, #f8f7ff 0%, #f0eeff 50%, #fdf8ff 100%)' }}>
+    <div className="min-h-screen flex flex-col bg-fog">
 
       {/* 顶部导航 */}
-      <header className="bg-white/70 backdrop-blur border-b border-gray-100 sticky top-0 z-10">
+      <header className="bg-paper/70 backdrop-blur border-b border-line sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🌱</span>
-            <span className="font-bold text-gray-900 text-sm">TEG秘书成长平台</span>
+          <div className="flex items-center gap-2.5">
+            <span className="w-8 h-8 rounded-lg bg-cocoa-800 flex items-center justify-center">
+              <Sprout className="w-4 h-4 text-blush" strokeWidth={2} />
+            </span>
+            <span className="font-medium text-cocoa-900 text-sm tracking-tight">TEG 秘书成长平台</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Link
               href="/dashboard/profile"
-              className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl hover:bg-gray-100 transition-colors"
+              className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-cocoa-100 transition-colors"
               title="个人设置 / 修改密码"
             >
-              <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs">
+              <div className="w-6 h-6 rounded-full bg-cocoa-100 flex items-center justify-center text-cocoa-800 font-semibold text-xs">
                 {session.user.name?.[0]?.toUpperCase() ?? '?'}
               </div>
-              <span className="text-gray-500 hidden sm:block">{session.user.name}</span>
+              <span className="text-cocoa-600 hidden sm:block">{session.user.name}</span>
             </Link>
             <SignOutButton />
           </div>
         </div>
       </header>
 
-      {/* 背景装饰 */}
+      {/* 背景装饰 —— 暖色漂移光晕 + 网点纹理 */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-        {/* 大光晕 */}
-        <div className="absolute top-[-120px] right-[-120px] w-[500px] h-[500px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%)' }} />
-        <div className="absolute bottom-[-80px] left-[-80px] w-[400px] h-[400px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 70%)' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.04) 0%, transparent 60%)' }} />
+        <div className="absolute top-[-120px] right-[-120px] w-[500px] h-[500px] rounded-full opacity-60 blur-3xl animate-drift-1"
+          style={{ background: 'radial-gradient(circle, #fbe1d1 0%, transparent 70%)' }} />
+        <div className="absolute bottom-[-80px] left-[-80px] w-[400px] h-[400px] rounded-full opacity-50 blur-3xl animate-drift-2"
+          style={{ background: 'radial-gradient(circle, #e8c4ac 0%, transparent 70%)' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full opacity-40 blur-3xl animate-drift-3"
+          style={{ background: 'radial-gradient(circle, #f5d9c4 0%, transparent 60%)' }} />
 
-        {/* 几何线条装饰 */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="grid" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#7c3aed" strokeWidth="0.8"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-
-        {/* 漂浮圆点 */}
-        <div className="absolute top-[18%] left-[8%] w-3 h-3 rounded-full bg-amber-300 opacity-30" />
-        <div className="absolute top-[35%] right-[12%] w-2 h-2 rounded-full bg-violet-400 opacity-25" />
-        <div className="absolute top-[65%] left-[15%] w-4 h-4 rounded-full bg-indigo-300 opacity-20" />
-        <div className="absolute top-[75%] right-[8%] w-2.5 h-2.5 rounded-full bg-amber-400 opacity-25" />
-        <div className="absolute top-[20%] right-[30%] w-1.5 h-1.5 rounded-full bg-violet-500 opacity-20" />
-
-        {/* 菱形装饰 */}
-        <div className="absolute top-[28%] left-[20%] w-5 h-5 bg-amber-200 opacity-20 rotate-45" />
-        <div className="absolute bottom-[25%] right-[22%] w-4 h-4 bg-violet-200 opacity-20 rotate-45" />
-
-        {/* 弧线 */}
-        <svg className="absolute bottom-0 left-0 w-64 h-64 opacity-[0.06]" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 200 Q100 100 200 0" fill="none" stroke="#a855f7" strokeWidth="1.5"/>
-          <path d="M0 200 Q80 120 200 40" fill="none" stroke="#a855f7" strokeWidth="1"/>
-        </svg>
-        <svg className="absolute top-0 right-0 w-64 h-64 opacity-[0.06]" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-          <path d="M200 0 Q100 100 0 200" fill="none" stroke="#f59e0b" strokeWidth="1.5"/>
-          <path d="M200 0 Q120 80 0 160" fill="none" stroke="#f59e0b" strokeWidth="1"/>
-        </svg>
+        {/* 细腻网点纹理 */}
+        <div className="absolute inset-0 opacity-[0.3]" style={{
+          backgroundImage: 'radial-gradient(#cf9c84 0.5px, transparent 0.5px)',
+          backgroundSize: '22px 22px',
+        }} />
       </div>
 
       {/* 主内容 */}
-      <main className="relative flex-1 flex flex-col items-center justify-center px-4 py-12" style={{ zIndex: 1 }}>
+      <main className="relative flex-1 flex flex-col items-center justify-center px-4 py-16 sm:py-24" style={{ zIndex: 1 }}>
 
         {/* 问候区 */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-3 bg-white/80 backdrop-blur text-indigo-600 text-xs font-medium px-5 py-2 rounded-full mb-5 shadow-sm border border-indigo-100 tracking-widest">
-            <span className="w-12 h-px bg-gradient-to-r from-transparent to-indigo-300" />
+        <div className="text-center mb-16 animate-fade-up">
+          <div className="inline-flex items-center gap-3 bg-paper/80 backdrop-blur text-cocoa-700 text-xs font-medium px-5 py-2 rounded-full mb-6 shadow-card border border-cocoa-200 tracking-widest">
+            <span className="w-12 h-px bg-gradient-to-r from-transparent to-cocoa-300" />
             让每一段成长，都有迹可循
-            <span className="w-12 h-px bg-gradient-to-l from-transparent to-indigo-300" />
+            <span className="w-12 h-px bg-gradient-to-l from-transparent to-cocoa-300" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-3 tracking-tight">
+          <h1 className="font-display text-5xl text-cocoa-900 mb-4 tracking-tight">
             你好，{session.user.name}
           </h1>
-          <p className="text-gray-400 text-sm">选择你的专区，开启今天的成长</p>
+          <p className="text-cocoa-500 text-base">选择你的专区，开启今天的成长</p>
         </div>
 
         {/* 双专区卡片 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
-
-          {/* 新人专区 */}
-          <Link href="/newbie" className="group">
-            <div className="relative overflow-hidden rounded-3xl p-8 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl cursor-pointer h-full"
-              style={{ background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 60%, #bfdbfe 100%)', border: '1.5px solid #93c5fd' }}>
-              {/* 装饰 */}
-              <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-20"
-                style={{ background: 'radial-gradient(circle, #3b82f6, transparent)', transform: 'translate(30%,-30%)' }} />
-              <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full opacity-10"
-                style={{ background: 'radial-gradient(circle, #6366f1, transparent)', transform: 'translate(-20%,20%)' }} />
-              {/* 右下角小菱形装饰 */}
-              <div className="absolute bottom-6 right-8 w-3 h-3 bg-blue-300 opacity-50 rotate-45" />
-              <div className="absolute bottom-10 right-14 w-1.5 h-1.5 bg-blue-400 opacity-40 rotate-45" />
-
-              <div className="text-5xl mb-5 relative z-10">🌱</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3 relative z-10">新人专区</h2>
-
-              <div className="flex flex-col gap-2.5 mb-6 relative z-10">
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <span className="w-5 h-5 rounded-full bg-blue-200 flex items-center justify-center text-xs flex-shrink-0">✦</span>
-                  <span>解锁新人必修课，领取入门秘籍</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <span className="w-5 h-5 rounded-full bg-blue-200 flex items-center justify-center text-xs flex-shrink-0">✦</span>
-                  <span>完成自测挑战，自信开启第一步</span>
-                </div>
-              </div>
-
-              <div className="inline-flex items-center gap-1.5 text-sm text-blue-700 font-semibold group-hover:gap-2.5 transition-all relative z-10">
-                进入新人专区 <span className="group-hover:translate-x-0.5 transition-transform">→</span>
-              </div>
-            </div>
-          </Link>
-
-          {/* 导师专区 */}
-          <Link href="/mentor" className="group">
-            <div className="relative overflow-hidden rounded-3xl p-8 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl cursor-pointer h-full"
-              style={{ background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 60%, #fde68a 100%)', border: '1.5px solid #fcd34d' }}>
-              {/* 装饰 */}
-              <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-20"
-                style={{ background: 'radial-gradient(circle, #f59e0b, transparent)', transform: 'translate(30%,-30%)' }} />
-              <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full opacity-10"
-                style={{ background: 'radial-gradient(circle, #fb923c, transparent)', transform: 'translate(-20%,20%)' }} />
-              {/* 右下角小菱形装饰 */}
-              <div className="absolute bottom-6 right-8 w-3 h-3 bg-amber-300 opacity-50 rotate-45" />
-              <div className="absolute bottom-10 right-14 w-1.5 h-1.5 bg-amber-400 opacity-40 rotate-45" />
-
-              <div className="text-5xl mb-5 relative z-10">🎓</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3 relative z-10">导师专区</h2>
-
-              <div className="flex flex-col gap-2.5 mb-6 relative z-10">
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <span className="w-5 h-5 rounded-full bg-amber-200 flex items-center justify-center text-xs flex-shrink-0">✦</span>
-                  <span>资质认证，加入导师池</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <span className="w-5 h-5 rounded-full bg-amber-200 flex items-center justify-center text-xs flex-shrink-0">✦</span>
-                  <span>跟踪新人进度，验收任务</span>
-                </div>
-              </div>
-
-              <div className="inline-flex items-center gap-1.5 text-sm text-amber-700 font-semibold group-hover:gap-2.5 transition-all relative z-10">
-                进入导师专区 <span className="group-hover:translate-x-0.5 transition-transform">→</span>
-              </div>
-            </div>
-          </Link>
-        </div>
+        <ZoneCards />
 
       </main>
 
-      <footer className="relative text-center text-xs text-gray-400 py-5" style={{ zIndex: 1 }}>
+      <footer className="relative text-center text-xs text-cocoa-500 py-5" style={{ zIndex: 1 }}>
         TEG办公室内务小组出品
       </footer>
     </div>

@@ -16,9 +16,9 @@ export default async function AdminPairsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-1 h-6 rounded-full bg-indigo-400" />
-        <h1 className="text-lg font-bold text-gray-900">导师新人匹配</h1>
-        <span className="ml-auto text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">
+        <div className="w-1 h-6 rounded-full bg-cocoa-500" />
+        <h1 className="font-display text-lg text-cocoa-900">导师新人匹配</h1>
+        <span className="ml-auto text-xs text-cocoa-500 bg-cocoa-100 px-2.5 py-1 rounded-full">
           共 {pairs.length} 对
         </span>
       </div>

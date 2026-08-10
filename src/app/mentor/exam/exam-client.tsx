@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { Award, FileText, PartyPopper, Frown, Check, X, RefreshCw, ArrowRight, GraduationCap } from 'lucide-react'
 import { MatchingQuestion } from '@/components/matching-question'
 
 interface Question {
@@ -66,45 +67,48 @@ export function MentorExamClient({ questions }: { questions: Question[] }) {
     const passed = result.passed
     return (
       <div className="max-w-lg mx-auto text-center py-8">
-        <div className={`rounded-3xl p-10 mb-6 relative overflow-hidden ${passed
-          ? 'bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200'
-          : 'bg-gradient-to-br from-gray-50 to-slate-100 border border-gray-200'}`}>
-          <div className="absolute top-[-20px] right-[-20px] text-8xl opacity-10">{passed ? '🏆' : '📝'}</div>
-          <div className="text-6xl mb-4">{passed ? '🎉' : '😅'}</div>
-          <div className={`text-7xl font-black mb-2 ${passed ? 'text-amber-500' : 'text-gray-400'}`}>
+        <div className={`rounded-2xl p-10 mb-6 relative overflow-hidden ${passed
+          ? 'bg-gradient-to-br from-cocoa-50 to-cocoa-100 border border-cocoa-300'
+          : 'bg-gradient-to-br from-cocoa-50 to-cocoa-100/60 border border-line'}`}>
+          <div className="absolute top-[-10px] right-[-10px] opacity-10 text-cocoa-800">
+            {passed ? <Award className="w-32 h-32" strokeWidth={1.5} /> : <FileText className="w-32 h-32" strokeWidth={1.5} />}
+          </div>
+          <div className="flex justify-center mb-4 text-cocoa-700">
+            {passed ? <PartyPopper className="w-14 h-14" strokeWidth={1.5} /> : <Frown className="w-14 h-14" strokeWidth={1.5} />}
+          </div>
+          <div className={`text-7xl font-black mb-2 ${passed ? 'text-cocoa-800' : 'text-cocoa-400'}`}>
             {result.score}
             <span className="text-2xl font-normal ml-1">分</span>
           </div>
-          <div className={`text-sm font-medium mb-1 ${passed ? 'text-amber-700' : 'text-gray-500'}`}>
+          <div className={`text-sm font-medium mb-1 ${passed ? 'text-cocoa-700' : 'text-cocoa-500'}`}>
             答对 {result.correctCount} / {result.total} 题
           </div>
           <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold mt-2
-            ${passed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
-            {passed ? '✓ 通过' : '✗ 未通过（需 80 分）'}
+            ${passed ? 'bg-cocoa-800 text-blush' : 'bg-blush text-sienna'}`}>
+            {passed ? <><Check className="w-4 h-4" strokeWidth={2.5} /> 通过</> : <><X className="w-4 h-4" strokeWidth={2.5} /> 未通过（需 80 分）</>}
           </div>
         </div>
 
         {passed && (
-          <p className="text-gray-500 text-sm mb-6">恭喜！导师认证证书已颁发，快去查看吧 🎓</p>
+          <p className="inline-flex items-center gap-1.5 text-cocoa-500 text-sm mb-6">恭喜！导师认证证书已颁发，快去查看吧 <GraduationCap className="w-4 h-4" strokeWidth={2} /></p>
         )}
         {!passed && (
-          <p className="text-gray-500 text-sm mb-6">需要 80 分才能通过，再试一次吧！</p>
+          <p className="text-cocoa-500 text-sm mb-6">需要 80 分才能通过，再试一次吧！</p>
         )}
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           {passed && (
             <Link href="/mentor/certificate"
-              className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold text-white shadow-sm"
-              style={{ background: 'linear-gradient(90deg, #f59e0b, #fb923c)' }}
+              className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-lg text-sm font-semibold text-blush bg-cocoa-800 hover:bg-cocoa-900 transition-all active:scale-[0.97] hover:-translate-y-0.5 hover:shadow-subtle"
             >
-              查看导师认证证书 →
+              查看导师认证证书 <ArrowRight className="w-4 h-4" strokeWidth={2} />
             </Link>
           )}
           <button
             onClick={handleRetake}
-            className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl text-sm font-semibold bg-white border-2 border-gray-200 text-gray-700 hover:border-amber-300 hover:text-amber-700 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-lg text-sm font-semibold bg-paper border border-cocoa-300 text-cocoa-700 hover:border-cocoa-400 hover:text-cocoa-900 transition-all active:scale-[0.97]"
           >
-            🔄 重新测试
+            <RefreshCw className="w-4 h-4" strokeWidth={2} /> 重新测试
           </button>
         </div>
       </div>
@@ -118,20 +122,20 @@ export function MentorExamClient({ questions }: { questions: Question[] }) {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">导师知识测试</h1>
-            <p className="text-sm text-gray-400 mt-0.5">共 {questions.length} 题 · 80 分及以上通过</p>
+            <h1 className="font-display text-xl text-cocoa-900">导师知识测试</h1>
+            <p className="text-sm text-cocoa-400 mt-0.5">共 {questions.length} 题 · 80 分及以上通过</p>
           </div>
           <div className="text-right">
-            <span className="text-2xl font-black text-amber-500">{answeredCount}</span>
-            <span className="text-gray-400 text-sm">/{questions.length}</span>
-            <p className="text-xs text-gray-400">已作答</p>
+            <span className="text-2xl font-black text-cocoa-700">{answeredCount}</span>
+            <span className="text-cocoa-400 text-sm">/{questions.length}</span>
+            <p className="text-xs text-cocoa-400">已作答</p>
           </div>
         </div>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-2 bg-cocoa-100 rounded-full overflow-hidden">
           <div className="h-full rounded-full transition-all duration-500"
             style={{
               width: `${(answeredCount / questions.length) * 100}%`,
-              background: 'linear-gradient(90deg, #f59e0b, #fb923c)',
+              background: 'linear-gradient(90deg, #7a4230, #b87a5e)',
             }} />
         </div>
       </div>
@@ -143,18 +147,18 @@ export function MentorExamClient({ questions }: { questions: Question[] }) {
           const typeLabel = { single: '单选', multiple: '多选', truefalse: '判断', matching: '连线' }[q.type] ?? q.type
 
           return (
-            <div key={q.id} className={`bg-white rounded-2xl border-2 p-5 transition-all duration-200
-              ${answered ? 'border-amber-200' : 'border-gray-100 hover:border-gray-200'}`}>
+            <div key={q.id} className={`bg-paper rounded-2xl border p-5 shadow-card transition-all duration-200
+              ${answered ? 'border-cocoa-300' : 'border-line hover:border-cocoa-200'}`}>
 
               {/* 题目头 */}
               <div className="flex items-start gap-3 mb-4">
                 <span className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
-                  ${answered ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-400'}`}>
-                  {answered ? '✓' : i + 1}
+                  ${answered ? 'bg-cocoa-800 text-blush' : 'bg-cocoa-100 text-cocoa-400'}`}>
+                  {answered ? <Check className="w-4 h-4" strokeWidth={2.5} /> : i + 1}
                 </span>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900 leading-relaxed">{q.content}</p>
-                  <span className="inline-block mt-1 text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">{typeLabel}</span>
+                  <p className="text-sm font-medium text-cocoa-900 leading-relaxed">{q.content}</p>
+                  <span className="inline-block mt-1 text-xs text-cocoa-700 bg-cocoa-100 px-2 py-0.5 rounded-full">{typeLabel}</span>
                 </div>
               </div>
 
@@ -164,7 +168,7 @@ export function MentorExamClient({ questions }: { questions: Question[] }) {
                 const rightItems: string[] = JSON.parse(q.answer)
                 return (
                   <div className="pl-10">
-                    <p className="text-xs text-gray-400 mb-3">点击左侧项，再点击右侧对应项完成连线</p>
+                    <p className="text-xs text-cocoa-400 mb-3">点击左侧项，再点击右侧对应项完成连线</p>
                     <MatchingQuestion
                       questionId={q.id}
                       leftItems={leftItems}
@@ -185,12 +189,12 @@ export function MentorExamClient({ questions }: { questions: Question[] }) {
                       ? ((answers[q.id] as string[]) || []).includes(key)
                       : answers[q.id] === key
                     return (
-                      <label key={oi} className={`flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer transition-all
+                      <label key={oi} className={`flex items-center gap-3 px-4 py-2.5 rounded-lg cursor-pointer transition-all
                         ${selected
-                          ? 'bg-amber-50 border-2 border-amber-300 text-amber-900'
-                          : 'border-2 border-gray-100 hover:border-amber-100 hover:bg-amber-50/50 text-gray-700'}`}>
+                          ? 'bg-cocoa-50 border border-cocoa-400 text-cocoa-900'
+                          : 'border border-line hover:border-cocoa-200 hover:bg-cocoa-50/50 text-cocoa-700'}`}>
                         <span className={`w-5 h-5 rounded flex items-center justify-center text-xs font-bold flex-shrink-0
-                          ${selected ? 'bg-amber-400 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                          ${selected ? 'bg-cocoa-800 text-blush' : 'bg-cocoa-100 text-cocoa-400'}`}>
                           {key}
                         </span>
                         <input
@@ -217,11 +221,11 @@ export function MentorExamClient({ questions }: { questions: Question[] }) {
         <button
           onClick={handleSubmit}
           disabled={submitting || answeredCount < questions.length}
-          className="w-full py-3.5 rounded-2xl font-bold text-sm text-white shadow-lg transition-all"
+          className="w-full py-3.5 rounded-lg font-bold text-sm text-paper shadow-float transition-all active:scale-[0.99]"
           style={{
             background: answeredCount < questions.length || submitting
-              ? '#d1d5db'
-              : 'linear-gradient(90deg, #f59e0b, #fb923c)',
+              ? '#cf9c84'
+              : 'linear-gradient(90deg, #5d2a1a, #7a4230)',
           }}
         >
           {submitting ? '提交中...' : answeredCount < questions.length

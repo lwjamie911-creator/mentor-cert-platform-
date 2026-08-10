@@ -47,8 +47,22 @@ prisma/
 - `NewbieExam / NewbieBadge` — 新人测试与达标勋章
 - `LearningMaterial / LearningProgress` — 学习资料与阅读进度
 
+## 数据库环境隔离（重要）
+平台已真实投产，迭代新版本时**严禁影响生产数据**。已做物理隔离：
+
+| 环境 | 连接的库 | Neon host |
+|------|---------|-----------|
+| 本地 `npm run dev`（读 `.env.local`） | Neon **dev 分支** | `ep-late-star-a1gmsa9t` |
+| Vercel 线上（读 Vercel 控制台环境变量） | Neon **main 生产库** | `ep-dawn-boat-a1v0x1bg` |
+
+- dev 分支是生产的 copy-on-write 快照，读写完全独立，改 dev 不回写生产（已实测验证）。
+- 生产连接串已备份在 `.env.local.bak-prod`（已 gitignore）。要临时切回生产：`cp .env.local.bak-prod .env.local`。
+- 本地 `npx prisma db push` 只作用于 dev 分支。**新版本上线前，对生产库的迁移要单独、谨慎执行**（先看 diff，防丢数据）。
+- 判断本地连的是哪个库：看 `.env.local` 里 `POSTGRES_*` 的 host —— `ep-late-star` = dev（安全），`ep-dawn-boat` = 生产（危险）。
+
 ## 注意事项
 - 数据库连接需要 `.env` 中的 `POSTGRES_PRISMA_URL` 和 `POSTGRES_URL_NON_POOLING`（Neon 提供）
 - Vercel 环境变量已配置，本地开发用 `.env.local`
 - 每次改 schema 后需要 `npx prisma db push` + `npx prisma generate`
+- **本地 `.env.local` 的 `NEXTAUTH_URL` 必须是 `http://localhost:3000`**（不能是线上 vercel 地址，否则本地登录后 session cookie 域名对不上，表现为"登录闪一下又弹回登录页"）。此项仅本地用，与线上 Vercel 无关。
 - 本地还有另一个不相关项目：`~/seat-platform`（工位管理平台），注意区分
