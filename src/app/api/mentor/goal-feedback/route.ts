@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
-const ALLOWED_FIELDS = ['workGoalFeedback', 'month1Feedback', 'month2Feedback', 'month3Feedback'] as const
+const ALLOWED_FIELDS = ['workGoalFeedback', 'month1Feedback', 'month2Feedback', 'month3Feedback', 'debriefFeedback'] as const
 type Field = (typeof ALLOWED_FIELDS)[number]
 
 // POST: 导师对名下新人的工作目标/月报填写评语

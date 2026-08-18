@@ -8,7 +8,7 @@ import { NewbieTabs } from './newbie-tabs'
 export default async function NewbiePage() {
   const session = await getServerSession(authOptions)!
 
-  const [exam, badge, materials, learningProgress, mentorPair, goalReview, review, classMeeting] = await Promise.all([
+  const [exam, badge, materials, learningProgress, mentorPair, goalReview, classMeeting] = await Promise.all([
     prisma.newbieExam.findUnique({ where: { userId: session!.user.id } }),
     prisma.newbieBadge.findUnique({ where: { userId: session!.user.id } }),
     prisma.learningMaterial.findMany({
@@ -21,9 +21,15 @@ export default async function NewbiePage() {
       include: { mentor: { select: { id: true, name: true } } },
     }),
     prisma.newbieGoalReview.findUnique({ where: { userId: session!.user.id } }),
-    prisma.newbieReview.findUnique({ where: { userId: session!.user.id } }),
-    prisma.classMeeting.findUnique({ where: { id: 'singleton' } }),
+    prisma.classMeeting.findFirst({ where: { isPublished: true }, orderBy: { createdAt: 'desc' } }),
   ])
+
+  // 自己在当前上架期的感言
+  const review = classMeeting
+    ? await prisma.newbieReview.findUnique({
+        where: { userId_meetingId: { userId: session!.user.id, meetingId: classMeeting.id } },
+      })
+    : null
 
   const completedIds = new Set(learningProgress.map(p => p.materialId))
   const materialsWithProgress = materials.map(m => ({ ...m, completed: completedIds.has(m.id) }))
@@ -35,10 +41,12 @@ export default async function NewbiePage() {
     try { reviewPhotos = JSON.parse(review.photosJson) } catch { reviewPhotos = [] }
   }
 
-  // 导师的班会感言（若已配对导师）
+  // 导师在当前上架期的班会感言（若已配对导师）
   let mentorReview: { text: string; photos: string[] } | null = null
-  if (mentorPair?.mentor.id) {
-    const mr = await prisma.newbieReview.findUnique({ where: { userId: mentorPair.mentor.id } })
+  if (mentorPair?.mentor.id && classMeeting) {
+    const mr = await prisma.newbieReview.findUnique({
+      where: { userId_meetingId: { userId: mentorPair.mentor.id, meetingId: classMeeting.id } },
+    })
     if (mr) {
       let photos: string[] = []
       try { photos = mr.photosJson ? JSON.parse(mr.photosJson) : [] } catch { photos = [] }
@@ -70,10 +78,12 @@ export default async function NewbiePage() {
         month1Url: goalReview?.month1Url ?? null,
         month2Url: goalReview?.month2Url ?? null,
         month3Url: goalReview?.month3Url ?? null,
+        debriefUrl: goalReview?.debriefUrl ?? null,
         workGoalFeedback: goalReview?.workGoalFeedback ?? null,
         month1Feedback: goalReview?.month1Feedback ?? null,
         month2Feedback: goalReview?.month2Feedback ?? null,
         month3Feedback: goalReview?.month3Feedback ?? null,
+        debriefFeedback: goalReview?.debriefFeedback ?? null,
       }}
       review={{
         text: review?.text ?? '',

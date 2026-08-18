@@ -14,7 +14,7 @@ function parsePhotos(json: string | null): string[] {
 export default async function MentorPage() {
   const session = await getServerSession(authOptions)!
 
-  const [selfCheck, mentorCert, pairs, allMaterials, learningProgress, mentorProfile, classMeeting, ownReviewRow] = await Promise.all([
+  const [selfCheck, mentorCert, pairs, allMaterials, learningProgress, mentorProfile, classMeeting] = await Promise.all([
     prisma.mentorSelfCheck.findUnique({ where: { userId: session!.user.id } }),
     prisma.mentorCertificate.findUnique({ where: { userId: session!.user.id } }),
     prisma.mentorNewbiePair.findMany({
@@ -35,9 +35,15 @@ export default async function MentorPage() {
     }),
     prisma.learningProgress.findMany({ where: { userId: session!.user.id } }),
     prisma.mentorProfile.findUnique({ where: { userId: session!.user.id } }),
-    prisma.classMeeting.findUnique({ where: { id: 'singleton' } }),
-    prisma.newbieReview.findUnique({ where: { userId: session!.user.id } }),
+    prisma.classMeeting.findFirst({ where: { isPublished: true }, orderBy: { createdAt: 'desc' } }),
   ])
+
+  // 导师自己在当前上架期的感言
+  const ownReviewRow = classMeeting
+    ? await prisma.newbieReview.findUnique({
+        where: { userId_meetingId: { userId: session!.user.id, meetingId: classMeeting.id } },
+      })
+    : null
 
   // 导师必学：mentor + both
   const materials = allMaterials.filter(m => m.zone === 'mentor' || m.zone === 'both')
@@ -63,7 +69,7 @@ export default async function MentorPage() {
           select: { userId: true, materialId: true },
         }),
         prisma.newbieGoalReview.findMany({ where: { userId: { in: newbieIds } } }),
-        prisma.newbieReview.findMany({ where: { userId: { in: newbieIds } } }),
+        prisma.newbieReview.findMany({ where: { userId: { in: newbieIds }, meetingId: classMeeting?.id ?? '__none__' } }),
       ])
     : [[], [], []]
 
@@ -100,10 +106,12 @@ export default async function MentorPage() {
         month1Url: gr?.month1Url ?? null,
         month2Url: gr?.month2Url ?? null,
         month3Url: gr?.month3Url ?? null,
+        debriefUrl: gr?.debriefUrl ?? null,
         workGoalFeedback: gr?.workGoalFeedback ?? null,
         month1Feedback: gr?.month1Feedback ?? null,
         month2Feedback: gr?.month2Feedback ?? null,
         month3Feedback: gr?.month3Feedback ?? null,
+        debriefFeedback: gr?.debriefFeedback ?? null,
       },
       review,
     }

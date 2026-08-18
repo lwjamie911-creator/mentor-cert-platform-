@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   Bird, KeyRound, Target, Compass, Sun, GraduationCap,
   ExternalLink, BookOpen, Check, Plus, Pencil, Egg, ArrowRight,
-  CalendarDays, Lock, MessageSquare,
+  CalendarDays, Lock, MessageSquare, Presentation,
   type LucideIcon,
 } from 'lucide-react'
 import { MentorLetterBanner } from './mentor-letter-banner'
@@ -49,10 +49,12 @@ interface GoalReview {
   month1Url: string | null
   month2Url: string | null
   month3Url: string | null
+  debriefUrl: string | null
   workGoalFeedback: string | null
   month1Feedback: string | null
   month2Feedback: string | null
   month3Feedback: string | null
+  debriefFeedback: string | null
 }
 
 interface Props {
@@ -472,6 +474,19 @@ function ReviewTab({ goalReview, theme }: {
           <DocLinkRow field="month3Url" label="第 3 个月月报" initialUrl={goalReview.month3Url} feedback={goalReview.month3Feedback} theme={theme} />
         </div>
       </SectionShell>
+
+      {/* 第三项：新人述职 */}
+      <SectionShell title="TEG秘书中心新人述职" icon={<Presentation className="w-4 h-4" strokeWidth={2} />} subtitle="提交你的新人述职材料链接（不限地址格式）">
+        <DocLinkRow
+          field="debriefUrl"
+          label="新人述职材料"
+          initialUrl={goalReview.debriefUrl}
+          feedback={goalReview.debriefFeedback}
+          theme={theme}
+          unrestricted
+          placeholder="粘贴述职材料链接（腾讯文档 / PPT / 视频等任意链接）"
+        />
+      </SectionShell>
     </div>
   )
 }
@@ -501,13 +516,15 @@ function MeetingTab({ review, classMeeting, mentorReview, mentorName }: {
 
 // 单行文档链接提交/展示/编辑
 function DocLinkRow({
-  field, label, initialUrl, feedback, theme,
+  field, label, initialUrl, feedback, theme, unrestricted, placeholder,
 }: {
-  field: 'workGoalUrl' | 'month1Url' | 'month2Url' | 'month3Url'
+  field: 'workGoalUrl' | 'month1Url' | 'month2Url' | 'month3Url' | 'debriefUrl'
   label: string
   initialUrl: string | null
   feedback?: string | null
   theme: TabTheme
+  unrestricted?: boolean          // 不限地址格式（如新人述职）
+  placeholder?: string
 }) {
   const router = useRouter()
   const [url, setUrl] = useState(initialUrl)
@@ -518,7 +535,7 @@ function DocLinkRow({
 
   async function save() {
     const trimmed = draft.trim()
-    if (trimmed && !isTencentDocUrl(trimmed)) {
+    if (trimmed && !unrestricted && !isTencentDocUrl(trimmed)) {
       setError('请提供腾讯文档链接（doc.weixin.qq.com）')
       return
     }
@@ -595,7 +612,7 @@ function DocLinkRow({
             type="url"
             value={draft}
             onChange={e => { setDraft(e.target.value); setError('') }}
-            placeholder="粘贴腾讯文档链接 https://doc.weixin.qq.com/..."
+            placeholder={placeholder ?? '粘贴腾讯文档链接 https://doc.weixin.qq.com/...'}
             className={`flex-1 px-3 py-2 border rounded-lg text-sm text-cocoa-900 placeholder:text-cocoa-400 bg-paper focus:outline-none focus:ring-2 focus:bg-paper transition-all ${theme.softBorder} ${theme.inputFocus}`}
           />
           <div className="flex gap-2">

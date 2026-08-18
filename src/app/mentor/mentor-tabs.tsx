@@ -41,10 +41,12 @@ interface NewbiePair {
     month1Url: string | null
     month2Url: string | null
     month3Url: string | null
+    debriefUrl: string | null
     workGoalFeedback: string | null
     month1Feedback: string | null
     month2Feedback: string | null
     month3Feedback: string | null
+    debriefFeedback: string | null
   }
   review: ReviewData | null
 }
@@ -409,6 +411,10 @@ function NewbieGuardCard({ pair, theme }: { pair: NewbiePair; theme: TabTheme })
           <GuardDocRow label="第 3 个月月报" url={pair.goalReview.month3Url}
             newbieId={pair.newbieId} field="month3Feedback" feedback={pair.goalReview.month3Feedback} theme={theme} compact />
         </div>
+
+        {/* 新人述职 */}
+        <GuardDocRow label="新人述职" url={pair.goalReview.debriefUrl}
+          newbieId={pair.newbieId} field="debriefFeedback" feedback={pair.goalReview.debriefFeedback} theme={theme} />
       </div>
     </Shell>
   )
@@ -418,7 +424,7 @@ function GuardDocRow({ label, url, newbieId, field, feedback, theme, compact }: 
   label: string
   url: string | null
   newbieId: string
-  field: 'workGoalFeedback' | 'month1Feedback' | 'month2Feedback' | 'month3Feedback'
+  field: 'workGoalFeedback' | 'month1Feedback' | 'month2Feedback' | 'month3Feedback' | 'debriefFeedback'
   feedback: string | null
   theme: TabTheme
   compact?: boolean
